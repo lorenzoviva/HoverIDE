@@ -1,3 +1,3 @@
 # HoverIDE
 
-SuperIDE is a HoverIDE branch specifically crafted to work on HoverIDE
+sandbox is a HoverIDE branch for sandboxing purposes
