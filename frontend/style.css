@@ -1,0 +1,116 @@
+
+.explorer-row {
+    padding: 6px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.explorer-row:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.explorer-label {
+    font-size: 13px;
+}
+
+.explorer-children {
+    margin-left: 12px;
+}
+
+/* HEADER BAR */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    background: #1e1e1e;
+    z-index: 10000;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #e8e8e8;
+}
+
+/* MENU BAR */
+.menu-bar {
+    display: flex;
+    gap: 10px;
+    padding: 0 10px;
+}
+
+/* DROPDOWN */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-label {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.dropdown-label:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* MENU */
+.dropdown-menu {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    background: #252526;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e8e8e8;
+    min-width: 180px;
+    z-index: 10001;
+}
+
+/* ITEM */
+.menu-item {
+    padding: 6px 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.menu-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* SUBMENU */
+.submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background: #252526;
+    min-width: 180px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* UTIL */
+.hidden {
+    display: none;
+}
+
+.file-actions {
+    float: right;
+    display: flex;
+    gap: 5px;
+}
+
+.file-actions button {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+}
+
+.file-actions button:hover {
+    color: white;
+}
+
+.editor-save {
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    z-index: 10000;
+}

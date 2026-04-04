@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "HoverIDE",
+  "version": "1.0",
+
+  "permissions": ["storage", "scripting", "activeTab"],
+
+  "host_permissions": ["<all_urls>"],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "iframe.html",
+        "iframe.js",
+        "style.css",
+        "components/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "action": {
+    "default_icon": {
+      "16": "images/png/HoverIDE_logo1.png",
+      "32": "images/png/HoverIDE_logo1.png",
+      "48": "images/png/HoverIDE_logo1.png",
+      "128": "images/png/HoverIDE_logo1.png"
+    }
+  },
+
+  "icons": {
+    "16": "images/png/HoverIDE_logo1.png",
+    "32": "images/png/HoverIDE_logo1.png",
+    "48": "images/png/HoverIDE_logo1.png",
+    "128": "images/png/HoverIDE_logo1.png"
+  }
+}
