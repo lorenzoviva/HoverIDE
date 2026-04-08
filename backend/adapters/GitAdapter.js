@@ -15,9 +15,6 @@ export default class GitAdapter {
     return execSync("git branch --show-current", { cwd }).toString().trim();
   }
 
-  static checkout(cwd, branch) {
-    execSync(`git checkout ${branch}`, { cwd });
-  }
 
   static commit(cwd, message) {
     execSync(`git add .`, { cwd });
@@ -26,5 +23,25 @@ export default class GitAdapter {
 
   static createBranch(cwd, branch) {
     execSync(`git checkout -b ${branch}`, { cwd });
+  }
+  static clone(repo, targetPath) {
+    execSync(`git clone ${repo} "${targetPath}"`);
+  }
+
+  static fetch(cwd) {
+    execSync(`git fetch`, { cwd });
+  }
+
+  static checkout(cwd, branch) {
+    execSync(`git checkout ${branch}`, { cwd });
+  }
+
+  static branchExists(cwd, branch) {
+    const branches = execSync(`git branch`, { cwd }).toString();
+    return branches.includes(branch);
+  }
+
+  static worktreeExists(worktreePath) {
+    return fs.existsSync(worktreePath);
   }
 }

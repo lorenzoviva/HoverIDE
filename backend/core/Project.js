@@ -1,14 +1,24 @@
 export default class Project {
   constructor({
-    name,
-    rootPath,
-    hoverideBranch,
+       hoverIDEGit,
+       hoverIDEBranch,
+       name,
+       git,
+       rootPath,
+       rootBranch,
+       localPath,
+       localBranch,
     systems = [],
     metadata = {}
   }) {
+    this.hoverIDEGit = hoverIDEGit;
+    this.hoverIDEBranch = hoverIDEBranch;
     this.name = name;
+    this.git = git;
     this.rootPath = rootPath;
-    this.hoverideBranch = hoverideBranch;
+    this.rootBranch = rootBranch;
+    this.localPath = localPath;
+    this.localBranch = localBranch;
     this.systems = systems;
     this.metadata = metadata;
   }

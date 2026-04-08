@@ -2,20 +2,21 @@ import express from "express";
 import FileSystemAdapter from "../adapters/FileSystemAdapter.js";
 import ProjectService from "../services/ProjectService.js";
 import path from "path";
+import WorkspaceService from "../services/WorkspaceService.js";
 
 const router = express.Router();
 
 // helper
-function resolvePath(project, relativePath) {
-  return path.join(project.rootPath, relativePath);
+function resolvePath(relativePath) {
+  const project = WorkspaceService.getProject();
+  return path.join(project.localPath, relativePath);
 }
 
 // READ FILE
 router.get("/read", (req, res) => {
-  const { projectName, path: filePath } = req.query;
+  const { path: filePath } = req.query;
 
-  const project = ProjectService.load(projectName);
-  const fullPath = resolvePath(project, filePath);
+  const fullPath = resolvePath(filePath);
 
   const content = FileSystemAdapter.read(fullPath);
   res.send(content);
@@ -23,10 +24,9 @@ router.get("/read", (req, res) => {
 
 // WRITE FILE
 router.post("/write", (req, res) => {
-  const { projectName, path: filePath, content } = req.body;
+  const { path: filePath, content } = req.body;
 
-  const project = ProjectService.load(projectName);
-  const fullPath = resolvePath(project, filePath);
+  const fullPath = resolvePath(filePath);
 
   FileSystemAdapter.write(fullPath, content);
 

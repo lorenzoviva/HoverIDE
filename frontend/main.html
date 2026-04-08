@@ -6,33 +6,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<h1>HoverIDE</h1>
-
-<div class="block">
-    <button onclick="initExplorer()">📂 Explorer</button>
-    <button onclick="pushChanges()">🚀 Push</button>
-</div>
-
-<div style="display:flex; gap:20px;">
-
-    <!-- HEADER CONTEXT MENU BAR -->
-    <div id="header"></div>
-
-    <!-- FILE EXPLORER -->
-    <div class="fixed block" style="width:30%; height:50%; top: 500px; position: fixed;">
-        <div id="explorer" style="height:100%; overflow:auto;">
-        </div>
-    </div>
-
-    <!-- EDITOR -->
-    <div style="width:100%; height: 100%">
-        <div id="editor" style="height:300px;"></div>
-        <div id="diff" style="height:300px;"></div>
-    </div>
-
-</div>
-
 <!-- Monaco -->
 <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
 <script src="main.js" type="module" ></script>
