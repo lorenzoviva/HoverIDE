@@ -32,23 +32,19 @@ export default class Editor extends Component {
               automaticLayout: true
             });
 
-            const saveBtn = document.createElement("button");
-            saveBtn.innerText = "Save";
-            saveBtn.className = "editor-save";
+            on("editor:save", async () => {
+                if (!this.currentPath) return;
 
-            saveBtn.onclick = async () => {
-              if (!this.currentPath) return;
-
-              // ⚠️ Backend confirmation
-              if (this.currentPath.includes("backend")) {
-                const confirmSave = confirm("Saving backend file will restart server. Continue?");
-                if (!confirmSave) return;
-              }
+                  // ⚠️ Backend confirmation
+                if (this.currentPath.includes("backend")) {
+                    const confirmSave = confirm("Saving backend file will restart server. Continue?");
+                    if (!confirmSave) return;
+                }
 
               await writeFile(this.currentPath, this.editor.getValue());
 
               emit("file:saved", this.currentPath);
-            };
+            });
             on("file:create", async () => {
 
               const path = prompt("Enter new file path (e.g. frontend/new.js)");
@@ -60,7 +56,6 @@ export default class Editor extends Component {
               emit("file:open", path);
             });
 
-            this.root.parentElement.insertBefore(saveBtn, this.root);
             // Track local edits
             this.editor.onDidChangeModelContent(() => {
                 if (!this.currentPath || this.isApplyingRemoteUpdate) return;

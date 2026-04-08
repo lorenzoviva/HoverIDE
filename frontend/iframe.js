@@ -34,7 +34,6 @@ async function bootstrap() {
     // Editor (Save wired via event)
     const editor = new Editor(document.getElementById("editor"));
     editor.mount();
-    on("editor:save", () => editor.save());
 
     // Sidebar manager — owns pin/hover behaviour
     const sidebarManager = new SidebarManager({

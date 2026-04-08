@@ -1,5 +1,5 @@
 /* ── IDE shell ────────────────────────────────────────── */
-html, body { height: 100%; margin: 0; overflow: hidden; }
+html, body { height: 100%; margin: 0; overflow: hidden; font-family: monospace}
 
 .ide-shell {
     display: flex;
@@ -393,4 +393,62 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 #editor {
     flex: 1;
     min-height: 0;
+}
+/* ── Header bar ──────────────────────────────────────── */
+.header,
+#header {
+    height: 35px;
+    display: flex;
+    align-items: center;
+    background: #1e1e1e;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: #e8e8e8;
+    flex-shrink: 0;
+}
+.menu-bar {
+    display: flex;
+    gap: 10px;
+    padding: 0 10px;
+}
+.dropdown { position: relative; }
+.dropdown-label { padding: 5px 10px; cursor: pointer; }
+.dropdown-label:hover { background: rgba(255,255,255,0.1); }
+.dropdown-menu {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    background: #252526;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e8e8e8;
+    min-width: 180px;
+    z-index: 10001;
+}
+.menu-item { padding: 6px 10px; cursor: pointer; position: relative; }
+.menu-item:hover { background: rgba(255,255,255,0.1); }
+.submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background: #252526;
+    min-width: 180px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.hidden { display: none; }
+
+/* ── Modals ──────────────────────────────────────────── */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.modal.hidden { display: none; }
+.modal-content {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 400px;
 }
