@@ -5,54 +5,91 @@ import ProjectService from "./ProjectService.js";
 
 export default class ProjectInitService {
 
-  static initProject({
-    name,
-    rootPath,
-    hoverideBranch,
-    isGitRepo,
-    baseBranch,
-    localBranch,
-    worktreePath
-  }) {
+  static initProject(config) {
 
-    // 1. Validate repo
-    if (isGitRepo) {
-      const gitFolder = path.join(rootPath, ".git");
-
-      if (!fs.existsSync(gitFolder)) {
-        throw new Error("Not a valid git repository");
-      }
-    }
-
-    // 2. Create local branch if needed
-    if (isGitRepo) {
-      try {
-        GitAdapter.createBranch(rootPath, localBranch);
-      } catch {
-        // branch may already exist → ignore
-      }
-
-      // 3. Create worktree (sandbox)
-      GitAdapter.createWorktree(rootPath, worktreePath, localBranch);
-    }
-
-    // 4. Create project metadata
-    const project = ProjectService.create({
+    const {
+      hoverIDEGit,
+      hoverIDEBranch,
       name,
-      rootPath: worktreePath || rootPath,
-      hoverideBranch
+      projectGit,
+      rootPath,
+      rootBranch,
+      localPath,
+      localBranch
+    } = config;
+
+    //////////////////////////////////////////////////////
+    // 1. CLONE PROJECT
+    //////////////////////////////////////////////////////
+
+    if (!fs.existsSync(rootPath)) {
+      GitAdapter.clone(projectGit, rootPath);
+    }
+
+    //////////////////////////////////////////////////////
+    // 2. ROOT BRANCH
+    //////////////////////////////////////////////////////
+
+    GitAdapter.checkout(rootPath, rootBranch);
+
+    //////////////////////////////////////////////////////
+    // 3. LOCAL BRANCH
+    //////////////////////////////////////////////////////
+
+    if (!GitAdapter.branchExists(rootPath, localBranch)) {
+      GitAdapter.createBranch(rootPath, localBranch);
+    }
+
+    //////////////////////////////////////////////////////
+    // 4. WORKTREE (SANDBOX)
+    //////////////////////////////////////////////////////
+
+    if (!fs.existsSync(localPath)) {
+      GitAdapter.createWorktree(rootPath, localPath, localBranch);
+    }
+
+    //////////////////////////////////////////////////////
+    // 5. SAVE HoverIDE.json
+    //////////////////////////////////////////////////////
+
+    fs.writeFileSync(
+      path.join(rootPath, "HoverIDE.json"),
+      JSON.stringify(config, null, 2)
+    );
+
+    //////////////////////////////////////////////////////
+    // 6. Restart HoverIDE if branch is different
+    //////////////////////////////////////////////////////
+    let restartRequired = false;
+    if(GitAdapter.branch(process.cwd()) !== hoverIDEBranch) {
+        GitAdapter.checkout(process.cwd(), hoverIDEBranch);
+        restartRequired = true;
+    }
+
+    //////////////////////////////////////////////////////
+    // 7. CREATE PROJECT MODEL
+    //////////////////////////////////////////////////////
+
+    const project = ProjectService.create({
+      hoverIDEGit,
+      hoverIDEBranch,
+      name: name,
+      git: projectGit,
+      rootPath,
+      rootBranch,
+      localPath,
+      localBranch,
+      metadata: {
+        vcs: {
+          projectGit,
+          rootPath,
+          rootBranch,
+          localPath,
+          localBranch
+        }
+      }
     });
 
-    // 5. Save VCS metadata
-    project.metadata.vcs = {
-      isGitRepo,
-      baseBranch,
-      localBranch,
-      worktreePath
-    };
-
-    ProjectService.save(project);
-
-    return project;
+    return {project, restartRequired};
   }
 }

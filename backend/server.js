@@ -33,12 +33,19 @@ app.use("/api/hoveride", hoverideRoutes);
 
 app.use("/api/file", fileRoutes);
 
-app.use(
-  "/monaco",
+app.use("/monaco",
   express.static(
     path.join(process.cwd(), "node_modules/monaco-editor/min")
   )
 );
+
+app.post("/restart", (req, res) => {
+  res.json({ message: "Restarting..." });
+
+  setTimeout(() => {
+    process.exit(0);
+  }, 100);
+});
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

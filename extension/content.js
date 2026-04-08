@@ -1,5 +1,6 @@
 // Prevent double injection
 function main() {
+  return; // Bypass injection
   if (window.__hoveride_injected__) return;
   window.__hoveride_injected__ = true;
 

@@ -3,20 +3,54 @@
 <head>
     <link rel="stylesheet" href="https://unpkg.com/blocks.css/dist/blocks.min.css">
     <link rel="stylesheet" href="style.css">
+    <script type="module" src="iframe.js"></script>
 </head>
 <body>
 
-<div id="header"></div>
+<div class="ide-shell">
 
-<div style="display:flex; height: calc(100% - 35px);">
+    <div id="header"></div>
 
-    <div id="explorer" style="width:250px; overflow:auto;"></div>
+    <div class="ide-body">
 
-    <div id="editor" style="flex:1;"></div>
+        <div class="activity-bar" id="activity-bar">
+            <button class="act-btn active" id="act-files" title="Explorer">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 3H8.71l-.85-.85A1 1 0 007.15 2H2.5A1.5 1.5 0 001 3.5v9A1.5 1.5 0 002.5 14h11a1.5 1.5 0 001.5-1.5v-8A1.5 1.5 0 0013.5 3z"/></svg>
+            </button>
+            <div class="act-spacer"></div>
+            <button class="act-btn" title="Settings">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 01-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 01-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 01.52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 011.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 011.255-.52l.292.16c1.64.892 3.433-.902 2.54-2.541l-.159-.292a.873.873 0 01.52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 01-.52-1.255l.16-.292c.892-1.64-.901-3.433-2.541-2.54l-.292.159a.873.873 0 01-1.255-.52l-.094-.319z"/></svg>
+            </button>
+        </div>
 
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">Explorer</span>
+                <div class="sidebar-toolbar-right">
+                    <button class="sb-icon-btn" id="pin-btn" title="Toggle pin">
+                        <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M4.146.146A.5.5 0 014.5 0h7a.5.5 0 01.5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 01-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 01-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 015 6.708V2.277a2.77 2.77 0 01-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 01.146-.354z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="explorer" class="sidebar-body"></div>
+            <div id="project-selector" style="display:none;"></div>
+        </div>
+
+        <div class="peek-panel" id="peek-panel">
+            <div class="sidebar-header">
+                <span class="sidebar-title">Explorer</span>
+            </div>
+            <div id="peek-explorer" class="sidebar-body"></div>
+        </div>
+
+        <div class="main-area">
+            <div id="editor-bar"></div>
+            <div id="editor" style="flex:1; min-height:0;"></div>
+            <div id="diff"></div>
+        </div>
+
+    </div>
 </div>
-
-<script type="module" src="iframe.js"></script>
 
 </body>
 </html>

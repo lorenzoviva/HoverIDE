@@ -1,4 +1,5 @@
 import Dropdown from "./Dropdown.js";
+import { emit } from "../../core/EventBus.js";
 
 export default class MenuBar {
 
@@ -14,7 +15,13 @@ export default class MenuBar {
             {
                 label: "Project",
                 items: [
-                    { label: "Open Project", action: () => console.log("Open project") }
+                   {
+                     label: "Open Project",
+                     action: () => {
+                         emit("project:change");
+//                        document.getElementById("project-selector").style.display = "block";
+                     }
+                   }
                 ]
             },
             {

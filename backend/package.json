@@ -12,5 +12,10 @@
     "express": "^4.19.2",
     "monaco-editor": "^0.55.1",
     "node-fetch": "^3.3.2"
-  }
+  },
+  "description": "",
+  "devDependencies": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

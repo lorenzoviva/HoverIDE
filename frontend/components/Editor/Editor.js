@@ -68,11 +68,11 @@ export default class Editor extends Component {
                 const content = this.editor.getValue();
 
                 // Save to extension (VCS working state)
-                sendState({
-                    type: "TRACK_EDIT",
-                    path: this.currentPath,
-                    content
-                });
+//                 sendState({
+//                     type: "TRACK_EDIT",
+//                     path: this.currentPath,
+//                     content
+//                 });
             });
 
         });
@@ -129,12 +129,14 @@ export default class Editor extends Component {
         }
 
         // Non-HTML → use backend + extension
-        const res = await fetch(`/api/read?path=${path}`);
+//         const res = await fetch(`/api/file/read?projectName=${}&path=${path}`);
+        const res = await fetch(`/api/file/read?path=${path}`);
         const original = await res.text();
 
-        const local = await sendState({ type: "GET_FILE", path });
+//         const local = await sendState({ type: "GET_FILE", path });
 
-        this.editor.setValue(local?.content || original);
+//         this.editor.setValue(local?.content || original);
+        this.editor.setValue(original);
     }
 
     /**
