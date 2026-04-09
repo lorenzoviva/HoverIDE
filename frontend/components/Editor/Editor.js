@@ -42,9 +42,13 @@ export default class Editor extends Component {
                     if (!confirmSave) return;
                 }
 
-              await writeFile(this.currentPath, this.editor.getValue());
-
-              emit("file:saved", this.currentPath);
+//               await writeFile(this.currentPath, this.editor.getValue());
+                  await fetch("/api/vcs/save", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({})
+                  });
+                  emit("file:saved", this.currentPath);
             });
             on("file:create", async () => {
 
