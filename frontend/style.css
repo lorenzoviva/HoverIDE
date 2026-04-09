@@ -226,6 +226,118 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 .header-icon-btn:hover { background: rgba(255,255,255,0.08); color: #e8e8e8; }
 .header-icon-btn--close:hover { background: rgba(232,70,70,0.18); color: #f48771; }
 
+/* ── IDE shell collapse / expand ─────────────────────── */
+.ide-shell {
+    /* existing layout rules stay — add these: */
+    transform-origin: bottom right;
+    transition:
+            width  .32s cubic-bezier(.4, 0, .2, 1),
+            height .32s cubic-bezier(.4, 0, .2, 1),
+            border-radius .32s ease,
+            box-shadow    .32s ease;
+}
+
+.ide-shell.collapsed {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, .55);
+    /* position the pill in the bottom-right corner of the host page */
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+}
+
+/* fade out everything except the H button when collapsing */
+.ide-shell.collapsed .header-badge,
+.ide-shell.collapsed .header-menu,
+.ide-shell.collapsed .header-right .header-close-btn {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease;
+}
+
+.ide-shell .header-badge,
+.ide-shell .header-menu,
+.ide-shell .header-right .header-close-btn {
+    transition: opacity .18s ease .1s;
+}
+
+.ide-shell.collapsed .ide-body {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .1s ease;
+}
+.ide-shell .ide-body {
+    transition: opacity .18s ease .08s;
+}
+
+/* H button — adapts between inline icon and round pill */
+.header-h-btn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: monospace;
+    transition: background .15s, color .15s, width .32s cubic-bezier(.4,0,.2,1), height .32s cubic-bezier(.4,0,.2,1), border-radius .32s ease;
+    position: relative;
+    z-index: 2;
+}
+.h-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: #252526;
+    color: #4fc1ff;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: monospace;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .15s ease;
+}
+
+.ide-shell.collapsed .h-btn {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.h-btn:hover {
+    background: #2d2d2d;
+    transform: scale(1.08);
+}
+
+/* close button shrinks to zero-width in collapsed state */
+.header-close-btn {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent; color: #888;
+    cursor: pointer; border-radius: 3px;
+    transition: background .12s, color .12s, width .2s ease, opacity .12s ease;
+    overflow: hidden;
+}
+.header-close-btn:hover { background: rgba(232,70,70,.18); color: #f48771; }
+.ide-shell.collapsed .header-close-btn { width: 0; opacity: 0; pointer-events: none; }
+
+
 /* ── Activity bar ─────────────────────────────────────── */
 .activity-bar {
     width: 40px;

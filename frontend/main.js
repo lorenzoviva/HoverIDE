@@ -1,7 +1,7 @@
 // MAIN ENTRY (runs in page, NOT inside iframe)
 
 function initIframe() {
-    const iframe = document.createElement("iframe");
+    globalThis.iframe = document.createElement("iframe");
 
     iframe.id = "hoveride-root";
 
@@ -35,6 +35,19 @@ window.addEventListener("message", (event) => {
         document.open();
         document.write(msg.content);
         document.close();
+    }
+    if (event.source !== iframe.contentWindow) return;
+
+    if (msg?.type === "IDE_COLLAPSE") {
+        iframe.style.pointerEvents = "none"; // let clicks pass through the host page
+        // re-enable pointer events only on the pill itself via the inner content
+        setTimeout(() => iframe.style.pointerEvents = "all", 350);
+    }
+
+    if (msg?.type === "IDE_EXPAND") {
+        iframe.style.width        = "100%";
+        iframe.style.height       = "100%";
+        iframe.style.borderRadius = "0";
     }
 
 });

@@ -2,13 +2,14 @@ import Header from "./components/Header/Header.js";
 import Explorer from "./components/Explorer/Explorer.js";
 import Editor from "./components/Editor/Editor.js";
 import ProjectSelector from "./components/ProjectSelector.js";
+import IDEShell from "./components/IDEShell/IDEShell.js";
 
 import EditorBar   from "./components/Editor/EditorBar.js";
 import SidebarManager from "./components/Sidebar/SidebarManager.js";
 import Modal from "./core/Modal.js";
 import { setProject, hasProject } from "./core/ProjectStore.js";
 import { getCurrentProject } from "./services/ProjectService.js";
-import { on } from "./core/EventBus.js";
+import { on, emit } from "./core/EventBus.js";
 
 const modal = new Modal();
 
@@ -20,6 +21,9 @@ async function bootstrap() {
     // Mount base UI (always)
     //////////////////////////////////////////////////////
 
+    // Mount IDEShell first — it needs to be ready before any collapse events fire
+    new IDEShell(document.querySelector(".ide-shell")).mount();
+    document.getElementById("h-btn").addEventListener("click", () => emit("ide:expand"));
 
     // Header
     new Header(document.getElementById("header")).mount();
