@@ -41,6 +41,7 @@ export default class VCSService {
 
     try {
       GitAdapter.merge(rootPath, localBranch);
+      GitAdapter.commit(rootPath, commitMessage);
     } catch (e) {
       throw new Error("Merge conflict detected. Manual resolution required.");
     }

@@ -73,8 +73,8 @@ export default class GitAdapter {
   }
 
   static merge(cwd, branch) {
-    let results = execSync(`git merge ${branch}`, { cwd });
-    console.log(`Executed git merge ${branch} in`, cwd, " results: ", results.toString());
+    let results = execSync(`git merge --ff --no-commit ${branch}`, { cwd });
+    console.log(`Executed git merge --ff --no-commit ${branch} in`, cwd, " results: ", results.toString());
   }
 
   static fetch(cwd) {
