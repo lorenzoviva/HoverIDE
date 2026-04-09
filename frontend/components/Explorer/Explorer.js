@@ -2,7 +2,6 @@ import Component from "../../core/Component.js";
 import { listFiles } from "../../services/FileService.js";
 import { getStatus } from "../../services/GitService.js";
 import { emit, on } from "../../core/EventBus.js";
-import { deleteFile } from "../../services/FileService.js";
 import { hasProject } from "../../core/ProjectStore.js";
 
 export default class Explorer extends Component {
@@ -12,6 +11,8 @@ export default class Explorer extends Component {
         this.tree = {};
         on("project:changed", () => this.mount());
         on("project:cleared", () => this.root.innerHTML = "");
+        on("explorer:refresh", () => this.mount());
+
     }
 
     async mount() {
@@ -27,10 +28,6 @@ export default class Explorer extends Component {
         this.root.innerHTML = "";
         this.root.appendChild(this.createToolbar());
         this.renderNode(this.tree, this.root, "", git, 0);
-
-        on("file:delete", async (path) => {
-            await deleteFile(path);
-        });
     }
 
     createToolbar() {

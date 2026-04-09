@@ -140,20 +140,12 @@ html, body { height: 100%; margin: 0; overflow: hidden; font-family: monospace}
 }
 .editor-bar-path-dir   { color: #666; }
 .editor-bar-path-file  { color: #ccc; }
-.editor-bar-btn {
-    height: 20px; padding: 0 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.06);
-    color: #aaa; font-size: 10px; cursor: pointer; border-radius: 3px;
-    transition: background 0.12s, color 0.12s;
-}
 .editor-bar-btn:hover { background: rgba(255,255,255,0.12); color: #e8e8e8; }
 
 #editor {
     flex: 1;
     min-height: 0;
 }
-
 
 
 /* ── IDE shell ────────────────────────────────────────── */

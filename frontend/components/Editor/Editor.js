@@ -2,7 +2,8 @@ import Component from "../../core/Component.js";
 import { send as sendState } from "../../services/StateService.js";
 import { on, emit } from "../../core/EventBus.js";
 import { sendToParent, listenFromParent } from "../../services/Bridge.js";
-import { writeFile, createFile } from "../../services/FileService.js";
+import { writeFile, createFile, deleteFile } from "../../services/FileService.js";
+import { getLanguageFromPath } from "../../services/LanguageService.js";
 
 export default class Editor extends Component {
 
@@ -49,11 +50,21 @@ export default class Editor extends Component {
 
               const path = prompt("Enter new file path (e.g. frontend/new.js)");
               if (!path) return;
-
               await createFile(path);
 
               emit("explorer:refresh");
               emit("file:open", path);
+              emit("file:created", path);
+            });
+            on("file:delete", async () => {
+                await deleteFile(path);
+                if(path === this.currentPath) {
+                    // closes editor if deleted file was open
+                    this.openFile();
+                    emit("editor:clear");
+                }
+                emit("explorer:refresh");
+                emit("file:deleted", path);
             });
 
             // Track local edits
@@ -115,6 +126,11 @@ export default class Editor extends Component {
      * Open file
      */
     async openFile(path) {
+        if(!path) {
+          this.editor.setValue("")
+          this.currentPath = null;
+          return;
+        }
         this.currentPath = path;
 
         // HTML files → source from live DOM
@@ -130,8 +146,13 @@ export default class Editor extends Component {
 
 //         const local = await sendState({ type: "GET_FILE", path });
 
-//         this.editor.setValue(local?.content || original);
+
+        const language = getLanguageFromPath(path);
         this.editor.setValue(original);
+        const model = this.editor.getModel();
+        if (model) {
+            monaco.editor.setModelLanguage(model, language);
+        }
     }
 
     /**

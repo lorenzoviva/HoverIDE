@@ -35,10 +35,9 @@ router.post("/write", (req, res) => {
 
 // DELETE FILE
 router.post("/delete", (req, res) => {
-  const { projectName, path: filePath } = req.body;
+  const { path: filePath } = req.body;
 
-  const project = ProjectService.load(projectName);
-  const fullPath = resolvePath(project, filePath);
+  const fullPath = resolvePath(filePath);
 
   FileSystemAdapter.delete(fullPath);
 
@@ -47,10 +46,9 @@ router.post("/delete", (req, res) => {
 
 // CREATE FILE
 router.post("/create", (req, res) => {
-  const { projectName, path: filePath } = req.body;
+  const { path: filePath } = req.body;
 
-  const project = ProjectService.load(projectName);
-  const fullPath = resolvePath(project, filePath);
+  const fullPath = resolvePath(filePath);
 
   FileSystemAdapter.create(fullPath);
 
@@ -59,12 +57,9 @@ router.post("/create", (req, res) => {
 
 // LIST FILES
 router.get("/list", (req, res) => {
-  const { projectName } = req.query;
-
-  const project = ProjectService.load(projectName);
-
-  const files = FileSystemAdapter.list(project.rootPath)
-    .map(f => path.relative(project.rootPath, f));
+  const projectPath = resolvePath(".");
+  const files = FileSystemAdapter.list(projectPath)
+    .map(f => path.relative(projectPath, f));
 
   res.json(files);
 });

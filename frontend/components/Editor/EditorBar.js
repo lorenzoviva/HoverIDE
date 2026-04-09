@@ -25,5 +25,9 @@ export default class EditorBar extends Component {
                 ? `<span class="editor-bar-path-dir">${dir}/</span><span class="editor-bar-path-file">${file}</span>`
                 : `<span class="editor-bar-path-file">${file}</span>`;
         });
+
+        on("editor:clear", () => {
+            this.pathEl.innerHTML = "";
+        });
     }
 }
