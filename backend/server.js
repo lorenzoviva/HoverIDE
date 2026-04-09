@@ -11,6 +11,7 @@ import systemRoutes from "./api/system.routes.js";
 import gitRoutes from "./api/git.routes.js";
 import hoverideRoutes from "./api/hoveride.routes.js";
 import fileRoutes from "./api/file.routes.js";
+import vcsRoutes from "./api/vcs.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,8 @@ app.use("/api/project", projectRoutes);
 app.use("/api/system", systemRoutes);
 app.use("/api/git", gitRoutes);
 app.use("/api/hoveride", hoverideRoutes);
+app.use("/api/vcs", vcsRoutes);
+
 
 app.use("/api/file", fileRoutes);
 

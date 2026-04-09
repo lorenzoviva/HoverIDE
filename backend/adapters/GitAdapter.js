@@ -17,31 +17,69 @@ export default class GitAdapter {
 
 
   static commit(cwd, message) {
-    execSync(`git add .`, { cwd });
-    execSync(`git commit -m "${message}"`, { cwd });
+    let addResult = execSync(`git add .`, { cwd });
+    console.log("Executed git add . in ", cwd, " results: ", addResult.toString());
+    let commitResult = execSync(`git commit -m "${message}"`, { cwd });
+    console.log(`Executed git commit -m "${message}"`, cwd, " results: ", commitResult.toString());
+
   }
 
   static createBranch(cwd, branch) {
-    execSync(`git checkout -b ${branch}`, { cwd });
+    let results =  execSync(`git checkout -b ${branch}`, { cwd });
+    console.log(`Executed git checkout -b ${branch} in`, cwd, " results: ", results.toString());
   }
   static clone(repo, targetPath) {
-    execSync(`git clone ${repo} "${targetPath}"`);
+    let results = execSync(`git clone ${repo} "${targetPath}"`);
+    console.log(`Executed git clone ${repo} "${targetPath}" in`, cwd, " results: ", results.toString());
   }
 
   static fetch(cwd) {
-    execSync(`git fetch`, { cwd });
+    let results = execSync(`git fetch`, { cwd });
+    console.log(`Executed git fetch in`, cwd, " results: ", results.toString());
   }
 
   static checkout(cwd, branch) {
-    execSync(`git checkout ${branch}`, { cwd });
+    let results = execSync(`git checkout ${branch}`, { cwd });
+    console.log(`Executed git checkout ${branch} in`, cwd, " results: ", results.toString());
   }
 
   static branchExists(cwd, branch) {
     const branches = execSync(`git branch`, { cwd }).toString();
+    console.log(`Executed git branch in`, cwd, " results: ", branches);
     return branches.includes(branch);
   }
 
   static worktreeExists(worktreePath) {
     return fs.existsSync(worktreePath);
   }
+  static addAll(cwd) {
+    let results = execSync(`git add .`, { cwd });
+    console.log(`Executed git add . in`, cwd, " results: ", results.toString());
+  }
+
+  static commit(cwd, message) {
+    try {
+      let results = execSync(`git commit -m "${message}"`, { cwd });
+      console.log(`Executed git commit -m "${message}" in`, cwd, " results: ", results.toString());
+    } catch {
+      // avoid crash if nothing to commit
+       console.log(`Error executing git commit -m "${message}" in`, cwd);
+    }
+  }
+
+  static push(cwd, branch) {
+    let results = execSync(`git push origin ${branch}`, { cwd });
+    console.log(`Executed git push origin ${branch} in`, cwd, " results: ", results.toString());
+  }
+
+  static merge(cwd, branch) {
+    let results = execSync(`git merge ${branch}`, { cwd });
+    console.log(`Executed git merge ${branch} in`, cwd, " results: ", results.toString());
+  }
+
+  static fetch(cwd) {
+    let results = execSync(`git fetch`, { cwd });
+    console.log(`Executed git fetch in`, cwd, " results: ", results.toString());
+  }
+
 }
