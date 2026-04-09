@@ -67,14 +67,14 @@ export default class GitAdapter {
     }
   }
 
-  static push(cwd, branch) {
-    let results = execSync(`git push origin ${branch}`, { cwd });
-    console.log(`Executed git push origin ${branch} in`, cwd, " results: ", results.toString());
+  static push(cwd) {
+    let results = execSync(`git push`, { cwd });
+    console.log(`Executed git push in`, cwd, " results: ", results.toString());
   }
 
   static merge(cwd, branch) {
-    let results = execSync(`git merge --ff --no-commit ${branch}`, { cwd });
-    console.log(`Executed git merge --ff --no-commit ${branch} in`, cwd, " results: ", results.toString());
+    let results = execSync(`git merge --ff --no-commit origin/${branch}`, { cwd });
+    console.log(`Executed git merge --ff --no-commit origin/${branch} in`, cwd, " results: ", results.toString());
   }
 
   static fetch(cwd) {
