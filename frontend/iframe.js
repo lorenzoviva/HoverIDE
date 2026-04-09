@@ -20,11 +20,13 @@ async function bootstrap() {
     //////////////////////////////////////////////////////
     // Mount base UI (always)
     //////////////////////////////////////////////////////
-
     // Mount IDEShell first — it needs to be ready before any collapse events fire
     new IDEShell(document.querySelector(".ide-shell")).mount();
-    document.getElementById("h-btn").addEventListener("click", () => emit("ide:expand"));
-
+//     document.getElementById("h-btn").addEventListener("click", () => emit("ide:expand"));
+    document.getElementById("h-btn").addEventListener("click", () => {
+        emit("ide:expand");
+        window.parent.postMessage({ type: "IDE_EXPAND" }, "*");
+    });
     // Header
     new Header(document.getElementById("header")).mount();
 

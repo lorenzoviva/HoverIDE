@@ -12,7 +12,8 @@ function initIframe() {
         width: "100%",
         height: "100%",
         border: "none",
-        zIndex: 999999
+        zIndex: 999999,
+        overflow: "visible" // 👈 important
     });
 
     iframe.src = "/iframe.html";
@@ -38,16 +39,29 @@ window.addEventListener("message", (event) => {
     }
     if (event.source !== iframe.contentWindow) return;
 
-    if (msg?.type === "IDE_COLLAPSE") {
-        iframe.style.pointerEvents = "none"; // let clicks pass through the host page
-        // re-enable pointer events only on the pill itself via the inner content
-        setTimeout(() => iframe.style.pointerEvents = "all", 350);
+    if (msg.type === "IDE_COLLAPSE") {
+        Object.assign(iframe.style, {
+            width: "36px",
+            height: "36px",
+            bottom: "16px",
+            right: "16px",
+            top: "auto",
+            left: "auto",
+            borderRadius: "50%",
+            pointerEvents: "auto"
+        });
     }
 
-    if (msg?.type === "IDE_EXPAND") {
-        iframe.style.width        = "100%";
-        iframe.style.height       = "100%";
-        iframe.style.borderRadius = "0";
+    if (msg.type === "IDE_EXPAND") {
+        Object.assign(iframe.style, {
+            width: "100%",
+            height: "100%",
+            top: "0",
+            left: "0",
+            bottom: "auto",
+            right: "auto",
+            borderRadius: "0"
+        });
     }
 
 });

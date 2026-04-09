@@ -1,10 +1,9 @@
 {
   "manifest_version": 3,
   "name": "HoverIDE",
-  "version": "1.0",
+  "version": "1.1",
 
-  "permissions": ["storage", "scripting", "activeTab"],
-
+  "permissions": ["storage", "scripting", "activeTab", "tabs"],
   "host_permissions": ["<all_urls>"],
 
   "background": {
@@ -19,31 +18,27 @@
     }
   ],
 
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "iframe.html",
-        "iframe.js",
-        "style.css",
-        "components/*"
-      ],
-      "matches": ["<all_urls>"]
-    }
-  ],
-
   "action": {
+    "default_popup": "popup.html",
     "default_icon": {
-      "16": "images/png/HoverIDE_logo1.png",
-      "32": "images/png/HoverIDE_logo1.png",
-      "48": "images/png/HoverIDE_logo1.png",
+      "16":  "images/png/HoverIDE_logo1.png",
+      "32":  "images/png/HoverIDE_logo1.png",
+      "48":  "images/png/HoverIDE_logo1.png",
       "128": "images/png/HoverIDE_logo1.png"
     }
   },
 
+  "web_accessible_resources": [
+    {
+      "resources": ["iframe.html", "iframe.js", "style.css", "components/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
   "icons": {
-    "16": "images/png/HoverIDE_logo1.png",
-    "32": "images/png/HoverIDE_logo1.png",
-    "48": "images/png/HoverIDE_logo1.png",
+    "16":  "images/png/HoverIDE_logo1.png",
+    "32":  "images/png/HoverIDE_logo1.png",
+    "48":  "images/png/HoverIDE_logo1.png",
     "128": "images/png/HoverIDE_logo1.png"
   }
 }
