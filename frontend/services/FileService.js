@@ -33,3 +33,16 @@ export async function listFiles() {
   return fetch(`/api/file/list`)
     .then(r => r.json());
 }
+
+// Returns [{ name, path, isDir }] — absolute paths, immediate children only
+export async function lsDir(dirPath) {
+    return fetch(`/api/file/ls?path=${encodeURIComponent(dirPath)}`).then(r => r.json());
+}
+
+export async function vcsCommit({ message, mergeMessage }) {
+    return fetch(`/api/vcs/commit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, mergeMessage }),
+    });
+}

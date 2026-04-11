@@ -79,6 +79,30 @@ async function bootstrap() {
     on("project:change", () => {
         header.openOpenProjectModal();
     });
+    on("vcs:mass-commit", async () => {
+        const { default: FilePicker } = await import("./core/FilePicker.js");
+        const { default: CommitModal } = await import("./components/modals/CommitModal.js");
+        const { vcsCommit } = await import("./services/FileService.js");
+
+        // Let user pick files to stage
+        const picker = new FilePicker({ mode: "file", multi: true, root: "/" });
+        const files = await picker.open();
+        if (!files?.length) return;
+
+        new CommitModal().open({
+            files,
+            onCommit: async ({ message, mergeMessage }) => {
+                const res = await vcsCommit({ message, mergeMessage });
+                if (!res.ok) {
+                    const { error } = await res.json().catch(() => ({ error: "Unknown error" }));
+                    alert(`Commit failed: ${error}`);
+                    return;
+                }
+                emit("explorer:refresh");
+            },
+        });
+    });
+
 }
 
 bootstrap();

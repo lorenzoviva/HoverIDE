@@ -4,48 +4,44 @@ let commitCounter = 0;
 
 export default class VCSService {
 
-  static generateMessage(message) {
-    if (message && message.trim()) return message;
-    return `auto-${++commitCounter}`;
-  }
-
-  static async save(project, message) {
-
-    const {
-      localPath,
-      rootPath,
-      localBranch,
-      rootBranch
-    } = project;
-
-    const commitMessage = this.generateMessage(message);
-
-    //////////////////////////////////////////////////////
-    // 1. COMMIT LOCAL
-    //////////////////////////////////////////////////////
-    GitAdapter.addAll(localPath);
-    GitAdapter.commit(localPath, commitMessage);
-    GitAdapter.push(localPath, localBranch);
-
-    //////////////////////////////////////////////////////
-    // 2. IF SAME BRANCH → STOP
-    //////////////////////////////////////////////////////
-    if (localBranch === rootBranch) return;
-
-    //////////////////////////////////////////////////////
-    // 3. MERGE INTO ROOT
-    //////////////////////////////////////////////////////
-    GitAdapter.fetch(rootPath);
-
-    GitAdapter.checkout(rootPath, rootBranch);
-
-    try {
-      GitAdapter.merge(rootPath, localBranch);
-      GitAdapter.commit(rootPath, commitMessage);
-    } catch (e) {
-      throw new Error("Merge conflict detected. Manual resolution required.");
+    static _autoMessage() {
+        return `auto-${++commitCounter}`;
     }
 
-    GitAdapter.push(rootPath, rootBranch);
-  }
+    // Write is already done by the time this is called.
+    // This commits, pushes, and promotes.
+    static async commit(project, message, mergeMessage) {
+        const { localPath, rootPath, localBranch, rootBranch } = project;
+
+        const localMsg = message?.trim()    || this._autoMessage();
+        const rootMsg  = mergeMessage?.trim() || localMsg;
+
+        // 1. Commit + push local sandbox branch
+        GitAdapter.addAll(localPath);
+        GitAdapter.commit(localPath, localMsg);
+        GitAdapter.push(localPath);
+
+        // 2. Promote to root branch (skip if same branch)
+        if (localBranch === rootBranch) return;
+
+        GitAdapter.fetch(rootPath);
+        GitAdapter.checkout(rootPath, rootBranch);
+        try {
+            GitAdapter.merge(rootPath, localBranch);
+            GitAdapter.commit(rootPath, rootMsg);
+        } catch (e) {
+            throw new Error("Merge conflict — manual resolution required.");
+        }
+        GitAdapter.push(rootPath);
+    }
+
+    // Convenience: write content to a path then commit.
+    // Used by single-file save flow.
+    static async save(project, filePath, content, message, mergeMessage) {
+        const { default: FileSystemAdapter } = await import("../adapters/FileSystemAdapter.js");
+        const path = await import("path");
+        const fullPath = path.default.join(project.localPath, filePath);
+        FileSystemAdapter.write(fullPath, content);
+        await this.commit(project, message, mergeMessage);
+    }
 }

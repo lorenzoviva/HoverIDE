@@ -147,6 +147,10 @@ html, body { height: 100%; margin: 0; overflow: hidden; font-family: monospace}
     min-height: 0;
 }
 
+/* ── Editor bar commit button ────────────────────────── */
+.editor-bar-btn--save {
+    margin-left: 4px;
+}
 
 /* ── IDE shell ────────────────────────────────────────── */
 html, body { height: 100%; margin: 0; overflow: hidden; }
@@ -598,7 +602,13 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 .mw-dot--close { background: #e84040; cursor: pointer; }
 .mw-dot--close:hover { background: #ff5050; }
 .mw-title-text { flex: 1; text-align: center; font-size: 11px; color: #777; }
-.mw-body { padding: 14px 16px; overflow-y: auto; flex: 1; }
+.mw-body {
+    padding: 14px 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    box-sizing: border-box;
+}
 .mw-footer {
     padding: 10px 16px;
     border-top: 1px solid rgba(255,255,255,0.06);
@@ -639,10 +649,21 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 .mw-field { margin-bottom: 10px; }
 .mw-field-label { font-size: 10px; color: #888; margin-bottom: 4px; }
 .mw-field-input {
-    width: 100%; background: #1a1a1a;
+    background: #1a1a1a;
     border: 1px solid rgba(255,255,255,0.1); color: #ccc;
     padding: 5px 8px; border-radius: 3px; font-size: 11px; font-family: monospace;
 }
+.mw-field-input,
+.mw-textarea {
+    box-sizing: border-box;
+    width: 100%;
+}
+.mw-field > div[style*="flex"] .mw-field-input {
+    min-width: 0;
+    flex: 1;
+}
+
+
 .mw-field-input:focus { outline: none; border-color: #4fc1ff; }
 
 /* Type picker grid */

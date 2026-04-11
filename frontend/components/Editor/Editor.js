@@ -1,176 +1,158 @@
 import Component from "../../core/Component.js";
-import { send as sendState } from "../../services/StateService.js";
 import { on, emit } from "../../core/EventBus.js";
 import { sendToParent, listenFromParent } from "../../services/Bridge.js";
 import { writeFile, createFile, deleteFile } from "../../services/FileService.js";
 import { getLanguageFromPath } from "../../services/LanguageService.js";
 
+const AUTOSAVE_DELAY = 800; // ms debounce
+
 export default class Editor extends Component {
 
     constructor(root) {
         super(root);
-
         this.editor = null;
         this.currentPath = null;
         this.isApplyingRemoteUpdate = false;
+        this._autosaveTimer = null;
+        this._dirty = false;
     }
 
     async mount() {
-
-        // Init Monaco
         await this.loadMonaco();
 
-          window.require.config({
-            paths: { vs: "/monaco/vs" }
-          });
+        window.require.config({ paths: { vs: "/monaco/vs" } });
 
-          window.require(["vs/editor/editor.main"], () => {
+        window.require(["vs/editor/editor.main"], () => {
 
             this.editor = monaco.editor.create(this.root, {
-              value: '',
-              language: 'javascript',
-              theme: 'vs-dark',
-              automaticLayout: true
+                value: "",
+                language: "javascript",
+                theme: "vs-dark",
+                automaticLayout: true,
             });
 
-            on("editor:save", async () => {
-                if (!this.currentPath) return;
-
-                  // ⚠️ Backend confirmation
-                if (this.currentPath.includes("backend")) {
-                    const confirmSave = confirm("Saving backend file will restart server. Continue?");
-                    if (!confirmSave) return;
-                }
-
-                  await writeFile(this.currentPath, this.editor.getValue());
-                  await fetch("/api/vcs/save", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({})
-                  });
-                  emit("file:saved", this.currentPath);
+            // Auto-write (not commit) on every keystroke after debounce
+            this.editor.onDidChangeModelContent(() => {
+                if (!this.currentPath || this.isApplyingRemoteUpdate) return;
+                this._dirty = true;
+                clearTimeout(this._autosaveTimer);
+                this._autosaveTimer = setTimeout(() => this._writeFile(), AUTOSAVE_DELAY);
             });
+
+            // "Save" = write immediately + open CommitModal
+            on("editor:save", () => this._onSave());
+
             on("file:create", async () => {
-
-              const path = prompt("Enter new file path (e.g. frontend/new.js)");
-              if (!path) return;
-              await createFile(path);
-
-              emit("explorer:refresh");
-              emit("file:open", path);
-              emit("file:created", path);
+                const path = prompt("Enter new file path (e.g. frontend/new.js)");
+                if (!path) return;
+                await createFile(path);
+                emit("explorer:refresh");
+                emit("file:open", path);
             });
-            on("file:delete", async () => {
+
+            on("file:delete", async (path) => {
                 await deleteFile(path);
-                if(path === this.currentPath) {
-                    // closes editor if deleted file was open
-                    this.openFile();
+                if (path === this.currentPath) {
+                    this.editor.setValue("");
+                    this.currentPath = null;
                     emit("editor:clear");
                 }
                 emit("explorer:refresh");
-                emit("file:deleted", path);
             });
-
-            // Track local edits
-            this.editor.onDidChangeModelContent(() => {
-                if (!this.currentPath || this.isApplyingRemoteUpdate) return;
-
-                const content = this.editor.getValue();
-
-                // Save to extension (VCS working state)
-//                 sendState({
-//                     type: "TRACK_EDIT",
-//                     path: this.currentPath,
-//                     content
-//                 });
-            });
-
         });
 
-        // Listen to file open
         on("file:open", (path) => this.openFile(path));
 
-        // Listen to parent DOM updates (DevTools edits)
         listenFromParent((msg) => {
-            if (msg.type === "DOM_MUTATION" && this.currentPath?.endsWith(".html")) {
-
+            if ((msg.type === "DOM_MUTATION" || msg.type === "DOM_RESPONSE")
+                    && this.currentPath?.endsWith(".html")) {
                 this.isApplyingRemoteUpdate = true;
-
                 this.editor.setValue(msg.content);
-
-                this.isApplyingRemoteUpdate = false;
-            }
-
-            if (msg.type === "DOM_RESPONSE" && this.currentPath?.endsWith(".html")) {
-
-                this.isApplyingRemoteUpdate = true;
-
-                this.editor.setValue(msg.content);
-
                 this.isApplyingRemoteUpdate = false;
             }
         });
-
     }
 
-  loadMonaco() {
-    return new Promise((resolve) => {
+    // Write content to disk silently (no commit)
+    async _writeFile() {
+        if (!this.currentPath || !this.editor) return;
+        if (this.currentPath.includes("backend")) return; // backend warns separately
+        await writeFile(this.currentPath, this.editor.getValue());
+        this._dirty = false;
+        emit("file:written", this.currentPath);
+    }
 
-      if (window.require) return resolve();
+    // Save button: flush write then open commit dialog
+    async _onSave() {
+        if (!this.currentPath) return;
 
-      const script = document.createElement("script");
-      script.src = "/monaco/vs/loader.js";
-
-      script.onload = () => resolve();
-
-      document.body.appendChild(script);
-    });
-  }
-    /**
-     * Open file
-     */
-    async openFile(path) {
-        if(!path) {
-          this.editor.setValue("")
-          this.currentPath = null;
-          return;
+        if (this.currentPath.includes("backend")) {
+            const ok = confirm("Saving backend file will restart server. Continue?");
+            if (!ok) return;
         }
-        this.currentPath = path;
 
-        // HTML files → source from live DOM
+        // Flush any pending autosave first
+        clearTimeout(this._autosaveTimer);
+        await this._writeFile();
+
+        // Open commit modal
+        const { default: CommitModal } = await import("../modals/CommitModal.js");
+        new CommitModal().open({
+            files: [this.currentPath],
+            onCommit: async ({ message, mergeMessage }) => {
+                const res = await fetch("/api/vcs/commit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message, mergeMessage }),
+                });
+                if (!res.ok) {
+                    const { error } = await res.json();
+                    alert(`Commit failed: ${error}`);
+                    return;
+                }
+                emit("file:saved", this.currentPath);
+                emit("explorer:refresh");
+            },
+        });
+    }
+
+    loadMonaco() {
+        return new Promise((resolve) => {
+            if (window.require) return resolve();
+            const script = document.createElement("script");
+            script.src = "/monaco/vs/loader.js";
+            script.onload = () => resolve();
+            document.body.appendChild(script);
+        });
+    }
+
+    async openFile(path) {
+        if (!path) {
+            this.editor?.setValue("");
+            this.currentPath = null;
+            return;
+        }
+
+        // Flush any pending write for the previous file
+        clearTimeout(this._autosaveTimer);
+        if (this._dirty) await this._writeFile();
+
+        this.currentPath = path;
+        this._dirty = false;
+
         if (path.endsWith(".html")) {
             sendToParent({ type: "GET_DOM" });
             return;
         }
 
-        // Non-HTML → use backend + extension
-//         const res = await fetch(`/api/file/read?projectName=${}&path=${path}`);
-        const res = await fetch(`/api/file/read?path=${path}`);
-        const original = await res.text();
-
-//         const local = await sendState({ type: "GET_FILE", path });
-
-
+        const res = await fetch(`/api/file/read?path=${encodeURIComponent(path)}`);
+        const content = await res.text();
         const language = getLanguageFromPath(path);
-        this.editor.setValue(original);
+
+        this.isApplyingRemoteUpdate = true;
+        this.editor.setValue(content);
         const model = this.editor.getModel();
-        if (model) {
-            monaco.editor.setModelLanguage(model, language);
-        }
+        if (model) monaco.editor.setModelLanguage(model, language);
+        this.isApplyingRemoteUpdate = false;
     }
-
-    /**
-     * Apply editor content to live DOM
-     */
-    applyToDOM() {
-        if (!this.currentPath?.endsWith(".html")) return;
-
-        const content = this.editor.getValue();
-
-        sendToParent({
-            type: "SET_DOM",
-            content
-        });
-    }
-
 }
