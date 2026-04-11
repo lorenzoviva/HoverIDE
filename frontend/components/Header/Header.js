@@ -4,11 +4,11 @@ import { on, emit } from "../../core/EventBus.js";
 
 export default class Header extends Component {
 
-     mount() {
+     async mount() {
             this.root.classList.add("header");
 
-            const menuBar = new MenuBar();
-            this.root.appendChild(menuBar.render());
+            this.menuBar = new MenuBar();
+            this.root.appendChild(await this.menuBar.render());
 
             this.badge = this.create("div", "header-badge");
             this.badge.innerHTML = `
@@ -43,5 +43,9 @@ export default class Header extends Component {
                 const text = this.root.querySelector(".header-badge-text");
                 if (text) text.textContent = "No project";
             });
+        }
+
+        openOpenProjectModal(){
+            this.menuBar.openOpenProjectModal();
         }
 }

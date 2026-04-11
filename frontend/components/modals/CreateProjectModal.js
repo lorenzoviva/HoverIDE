@@ -1,5 +1,6 @@
 import ModalWindow from "../../core/ModalWindow.js";
 import Wizard from "../../core/Wizard.js";
+import BrowseField from "../../core/BrowseField.js";
 import { emit } from "../../core/EventBus.js";
 import { setProject } from "../../core/ProjectStore.js";
 
@@ -40,10 +41,18 @@ export default class CreateProjectModal {
                     title: "Paths",
                     render() {
                         const wrap = document.createElement("div");
-                        wrap.appendChild(field("Root path", "rootPath", "H:/projects/my-project"));
-                        wrap.appendChild(field("Root branch", "rootBranch", "main"));
-                        wrap.appendChild(field("Local (sandbox) path", "localPath", "H:/projects/sandboxes/my-project"));
-                        wrap.appendChild(field("Local branch", "localBranch", "sandbox"));
+                        const rootF  = BrowseField.create({ label: "Root path",             key: "rootPath",  placeholder: "H:/projects/my-project",       mode: "folder" });
+                        const localF = BrowseField.create({ label: "Local (sandbox) path",  key: "localPath", placeholder: "H:/projects/sandboxes/my-project", mode: "folder" });
+                        wrap.appendChild(rootF.wrapper);
+                        wrap.appendChild(localF.wrapper);
+                        // plain field for branches (no browse)
+                        ["rootBranch","localBranch"].forEach(k => {
+                            const f = document.createElement("div");
+                            f.className = "mw-field";
+                            f.innerHTML = `<div class="mw-field-label">${k}</div>
+                                <input class="mw-field-input" data-key="${k}" placeholder="main" />`;
+                            wrap.appendChild(f);
+                        });
                         return wrap;
                     },
                     collect(data) {

@@ -86,4 +86,13 @@ router.get("/:name", (req, res) => {
   res.json(project);
 });
 
+router.post("/save", (req, res) => {
+    try {
+        ProjectService.save(req.body);
+        res.sendStatus(200);
+    } catch (e) {
+        res.status(400).json({ error: e.message });
+    }
+});
+
 export default router;

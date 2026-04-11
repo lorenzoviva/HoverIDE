@@ -1,90 +1,87 @@
 export default class Wizard {
 
-    // steps: [{ title, render(data) => HTMLElement, validate(data) => bool }]
-    constructor({ title, width, steps, onFinish, onCancel }) {
-        this.title    = title;
-        this.width    = width || 420;
+    constructor({ steps, onFinish, onCancel }) {
         this.steps    = steps;
         this.onFinish = onFinish;
         this.onCancel = onCancel;
         this.current  = 0;
-        this.data     = {};
     }
 
     render() {
+        // Fresh isolated data per render call — fixes cross-instance contamination
+        this._data   = {};
+        this.current = 0;
+
         const root = document.createElement("div");
+        this._stepLabels = document.createElement("div");
+        this._stepLabels.className = "wiz-step-labels";
+        this._stepBar = document.createElement("div");
+        this._stepBar.className = "wiz-step-bar";
+        this._body = document.createElement("div");
+        this._body.className = "wiz-body";
+        this._footer = document.createElement("div");
+        this._footer.className = "wiz-footer";
 
-        this.stepBarEl    = document.createElement("div");
-        this.stepBarEl.className = "wiz-step-bar";
-        this.stepLabelsEl = document.createElement("div");
-        this.stepLabelsEl.className = "wiz-step-labels";
-        this.bodyEl       = document.createElement("div");
-        this.bodyEl.className = "wiz-body";
-        this.footerEl     = document.createElement("div");
-        this.footerEl.className = "wiz-footer";
+        root.appendChild(this._stepLabels);
+        root.appendChild(this._stepBar);
+        root.appendChild(this._body);
+        root.appendChild(this._footer);
 
-        root.appendChild(this.stepLabelsEl);
-        root.appendChild(this.stepBarEl);
-        root.appendChild(this.bodyEl);
-        root.appendChild(this.footerEl);
-
-        this._renderStep();
+        this._draw();
         return root;
     }
 
-    _renderStep() {
-        // Step bar
-        this.stepBarEl.innerHTML = this.steps.map((_, i) => {
-            const cls = i < this.current ? "wiz-seg wiz-seg--done"
-                      : i === this.current ? "wiz-seg wiz-seg--active"
-                      : "wiz-seg";
-            return `<div class="${cls}"></div>`;
+    _draw() {
+        const n = this.steps.length;
+
+        this._stepBar.innerHTML = this.steps.map((_, i) => {
+            const c = i < this.current ? "wiz-seg--done"
+                    : i === this.current ? "wiz-seg--active" : "";
+            return `<div class="wiz-seg ${c}"></div>`;
         }).join("");
 
-        this.stepLabelsEl.innerHTML = this.steps.map((s, i) => {
-            const cls = i < this.current ? "wiz-lbl wiz-lbl--done"
-                      : i === this.current ? "wiz-lbl wiz-lbl--active"
-                      : "wiz-lbl";
-            return `<span class="${cls}">${i + 1}. ${s.title}</span>`;
+        this._stepLabels.innerHTML = this.steps.map((s, i) => {
+            const c = i < this.current ? "wiz-lbl--done"
+                    : i === this.current ? "wiz-lbl--active" : "";
+            return `<span class="wiz-lbl ${c}">${i + 1}. ${s.title}</span>`;
         }).join("");
 
-        // Body
-        this.bodyEl.innerHTML = "";
-        const stepEl = this.steps[this.current].render(this.data);
-        this.bodyEl.appendChild(stepEl);
+        this._body.innerHTML = "";
+        this._body.appendChild(this.steps[this.current].render(this._data));
 
-        // Footer
-        this.footerEl.innerHTML = "";
+        this._footer.innerHTML = "";
 
-        const cancelBtn = document.createElement("button");
-        cancelBtn.className = "mw-btn mw-btn--ghost";
-        cancelBtn.textContent = "Cancel";
-        cancelBtn.onclick = () => this.onCancel?.();
-        this.footerEl.appendChild(cancelBtn);
+        const cancel = this._btn("Cancel", "mw-btn--ghost", () => this.onCancel?.());
+        this._footer.appendChild(cancel);
 
         if (this.current > 0) {
-            const backBtn = document.createElement("button");
-            backBtn.className = "mw-btn mw-btn--ghost";
-            backBtn.textContent = "← Back";
-            backBtn.onclick = () => { this.current--; this._renderStep(); };
-            this.footerEl.appendChild(backBtn);
+            const back = this._btn("← Back", "mw-btn--ghost", () => {
+                this.current--;
+                this._draw();
+            });
+            this._footer.appendChild(back);
         }
 
-        const isLast = this.current === this.steps.length - 1;
-        const nextBtn = document.createElement("button");
-        nextBtn.className = "mw-btn mw-btn--primary";
-        nextBtn.textContent = isLast ? "Finish" : "Next →";
-        nextBtn.onclick = () => {
+        const last = this.current === n - 1;
+        const next = this._btn(last ? "Finish" : "Next →", "mw-btn--primary", () => {
             const step = this.steps[this.current];
-            if (step.collect) step.collect(this.data);
-            if (step.validate && !step.validate(this.data)) return;
-            if (isLast) {
-                this.onFinish?.(this.data);
+            if (step.collect) step.collect(this._data);
+            if (step.validate && !step.validate(this._data)) return;
+            if (last) {
+                this.onFinish?.(this._data);
             } else {
                 this.current++;
-                this._renderStep();
+                this._draw();
             }
-        };
-        this.footerEl.appendChild(nextBtn);
+        });
+        this._footer.appendChild(next);
+    }
+
+    _btn(label, cls, onClick) {
+        const b = document.createElement("button");
+        b.className = `mw-btn ${cls}`;
+        b.textContent = label;
+        b.onclick = onClick;
+        return b;
     }
 }

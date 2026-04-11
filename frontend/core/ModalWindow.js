@@ -10,7 +10,8 @@ export default class ModalWindow {
     render() {
         const overlay = document.createElement("div");
         overlay.className = "mw-overlay";
-        overlay.onclick = (e) => { if (e.target === overlay) this.close(); };
+        // Prevent closing from clicking outside the modal window
+//         overlay.onclick = (e) => { if (e.target === overlay) this.close(); };
 
         const win = document.createElement("div");
         win.className = "mw-win";

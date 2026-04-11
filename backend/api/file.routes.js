@@ -64,4 +64,28 @@ router.get("/list", (req, res) => {
   res.json(files);
 });
 
+// Directory listing for FilePicker (returns immediate children, not recursive)
+router.get("/ls", (req, res) => {
+    const { path: dirPath } = req.query;
+    const fullPath = dirPath || "/";
+
+    try {
+        const entries = fs.readdirSync(fullPath, { withFileTypes: true })
+            .filter(e => !e.name.startsWith("."))
+            .map(e => ({
+                name:  e.name,
+                path:  path.join(fullPath, e.name).replace(/\\/g, "/"),
+                isDir: e.isDirectory(),
+            }))
+            .sort((a, b) => {
+                if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
+                return a.name.localeCompare(b.name);
+            });
+        res.json(entries);
+    } catch (e) {
+        res.status(400).json({ error: e.message });
+    }
+});
+
+
 export default router;

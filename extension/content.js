@@ -42,6 +42,18 @@ if (!window.__hoveride_content_loaded__) {
         iframe = createIframe(project, system);
         document.documentElement.appendChild(iframe);
 
+        // Snapshot page resources and send to IDE
+        const snapshot = {
+            scripts:     [...document.scripts].map(s => s.src).filter(Boolean),
+            stylesheets: [...document.styleSheets].map(s => s.href).filter(Boolean),
+            images:      [...document.images].map(i => i.src).filter(Boolean),
+        };
+
+        iframe.addEventListener("load", () => {
+            iframe.contentWindow.postMessage({ type: "PAGE_SNAPSHOT", snapshot }, "*");
+        });
+
+
         // DOM bridge
         observer = new MutationObserver(() => {
             if (!tracking) return;

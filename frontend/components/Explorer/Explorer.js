@@ -1,4 +1,5 @@
 import Component from "../../core/Component.js";
+import ExplorerContextMenu from "./ExplorerContextMenu.js";
 import { listFiles } from "../../services/FileService.js";
 import { getStatus } from "../../services/GitService.js";
 import { emit, on } from "../../core/EventBus.js";
@@ -28,6 +29,10 @@ export default class Explorer extends Component {
         this.root.innerHTML = "";
         this.root.appendChild(this.createToolbar());
         this.renderNode(this.tree, this.root, "", git, 0);
+
+        on("file:create:at", (parentPath) => this._inlineCreate(parentPath, "file"));
+        on("folder:create:at", (parentPath) => this._inlineCreate(parentPath, "folder"));
+        on("file:rename", (path) => this._inlineRename(path));
     }
 
     createToolbar() {
@@ -121,7 +126,12 @@ export default class Explorer extends Component {
                 emit("file:delete", fullPath);
             };
             row.appendChild(delBtn);
-
+            const ctxMenu = new ExplorerContextMenu();
+            row.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                ctxMenu.show(e.clientX, e.clientY, fullPath, leaf);
+            });
             container.appendChild(row);
 
             if (!leaf) {
@@ -151,6 +161,48 @@ export default class Explorer extends Component {
         });
     }
 
+    _inlineCreate(parentPath, type) {
+        // find the children container for parentPath and inject an editable row
+        const allRows = this.root.querySelectorAll(".explorer-row");
+        let targetContainer = this.root;
+
+        allRows.forEach(row => {
+            if (row.querySelector(".explorer-label")?.title === parentPath) {
+                // next sibling is the children div
+                const sib = row.nextElementSibling;
+                if (sib?.classList.contains("explorer-children")) {
+                    targetContainer = sib;
+                    sib.style.display = "block";
+                }
+            }
+        });
+
+        const row = this.create("div", "explorer-row explorer-row--editing");
+        const icon = this.create("span", "explorer-icon");
+        icon.textContent = type === "folder" ? "📁" : "📄";
+        const input = this.create("input", "explorer-inline-input");
+        input.placeholder = type === "folder" ? "folder-name" : "filename.js";
+
+        row.appendChild(icon);
+        row.appendChild(input);
+        targetContainer.insertBefore(row, targetContainer.firstChild);
+        input.focus();
+
+        const commit = async () => {
+            const name = input.value.trim();
+            row.remove();
+            if (!name) return;
+            const full = parentPath ? `${parentPath}/${name}` : name;
+            if (type === "folder") emit("folder:create", full);
+            else { await import("../../services/FileService.js").then(m => m.createFile(full)); emit("explorer:refresh"); }
+        };
+
+        input.onblur  = commit;
+        input.onkeydown = (e) => {
+            if (e.key === "Enter")  commit();
+            if (e.key === "Escape") row.remove();
+        };
+    }
     getColor(path, git) {
         return git.some(e => path.includes(e.file)) ? "#e2c08d" : "#73c991";
     }

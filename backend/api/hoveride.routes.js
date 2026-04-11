@@ -1,5 +1,6 @@
 import express from "express";
 import HoverIDEService from "../services/HoverIDEService.js";
+import GitAdapter from "../adapters/GitAdapter.js";
 
 const router = express.Router();
 
@@ -14,6 +15,11 @@ router.get("/branch", (req, res) => {
 router.post("/switch", (req, res) => {
   HoverIDEService.switchBranch(HOVERIDE_PATH, req.body.branch);
   res.sendStatus(200);
+});
+
+router.get("/branches", (req, res) => {
+    const branches = GitAdapter.listBranches(HOVERIDE_PATH);
+    res.json(branches);
 });
 
 export default router;

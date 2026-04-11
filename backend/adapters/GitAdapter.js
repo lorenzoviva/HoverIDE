@@ -81,5 +81,12 @@ export default class GitAdapter {
     let results = execSync(`git fetch`, { cwd });
     console.log(`Executed git fetch in`, cwd, " results: ", results.toString());
   }
-
+    static listBranches(cwd) {
+        const out = execSync(`git -C "${cwd}" branch -a --format="%(refname:short)"`)
+            .toString().trim().split("\n")
+            .map(b => b.trim().replace(/^origin\//, ""))
+            .filter((b, i, arr) => b && arr.indexOf(b) === i);
+                console.log(`Executed git -C "${cwd}" branch -a --format="%(refname:short) results:`, out);
+        return out;
+}
 }

@@ -1,17 +1,12 @@
 import Header from "./components/Header/Header.js";
 import Explorer from "./components/Explorer/Explorer.js";
 import Editor from "./components/Editor/Editor.js";
-import ProjectSelector from "./components/ProjectSelector.js";
 import IDEShell from "./components/IDEShell/IDEShell.js";
-
 import EditorBar   from "./components/Editor/EditorBar.js";
 import SidebarManager from "./components/Sidebar/SidebarManager.js";
-import Modal from "./core/Modal.js";
 import { setProject, hasProject } from "./core/ProjectStore.js";
 import { getCurrentProject } from "./services/ProjectService.js";
 import { on, emit } from "./core/EventBus.js";
-
-const modal = new Modal();
 
 let explorer, editor, header;
 
@@ -28,17 +23,18 @@ async function bootstrap() {
         window.parent.postMessage({ type: "IDE_EXPAND" }, "*");
     });
     // Header
-    new Header(document.getElementById("header")).mount();
+    header = new Header(document.getElementById("header"));
+    await header.mount();
 
     // Explorer
-    const explorer = new Explorer(document.getElementById("explorer"));
+    explorer = new Explorer(document.getElementById("explorer"));
     explorer.mount();
 
     // Editor bar (path display + save button)
     new EditorBar(document.getElementById("editor-bar")).mount();
 
     // Editor (Save wired via event)
-    const editor = new Editor(document.getElementById("editor"));
+    editor = new Editor(document.getElementById("editor"));
     editor.mount();
 
     // Sidebar manager — owns pin/hover behaviour
@@ -61,13 +57,12 @@ async function bootstrap() {
             console.log("Loading project: ", project)
             setProject(project);
             console.log("Loaded UI for project")
-            hideModal();
             await explorer.mount();
         } else {
-            showProjectSelector();
+            header.openOpenProjectModal();
         }
     } catch {
-        showProjectSelector();
+           header.openOpenProjectModal();
     }
 
     //////////////////////////////////////////////////////
@@ -75,39 +70,15 @@ async function bootstrap() {
     //////////////////////////////////////////////////////
 
     on("project:changed", async () => {
-        hideModal();
         await explorer.mount();
     });
 
     on("project:cleared", () => {
-        showProjectSelector();
+        header.openOpenProjectModal();
     });
     on("project:change", () => {
-        showProjectSelector();
+        header.openOpenProjectModal();
     });
-}
-
-///////////////////////////////////////////////////////////
-// MODAL HANDLING
-///////////////////////////////////////////////////////////
-
-function showProjectSelector() {
-    const selector = new ProjectSelector();
-
-    selector.onSelect = async (project) => {
-        setProject(project);
-    };
-
-    selector.onCreate = async (project) => {
-        setProject(project);
-    };
-
-    modal.setContent(selector.render());
-    modal.show();
-}
-
-function hideModal() {
-    modal.hide();
 }
 
 bootstrap();

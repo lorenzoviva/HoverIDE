@@ -551,7 +551,9 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 }
 .hidden { display: none; }
 
-/* ── Modals ──────────────────────────────────────────── */
+/* ── ModalWindow ─────────────────────────────────────── */
+
+
 .modal {
     position: fixed;
     inset: 0;
@@ -568,3 +570,208 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
     border-radius: 8px;
     min-width: 400px;
 }
+.mw-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99998;
+}
+.mw-hidden { display: none !important; }
+.mw-win {
+    background: #252526;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    max-height: 80vh;
+    user-select: none;
+}
+.mw-titlebar {
+    height: 30px; background: #1a1a1a;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; padding: 0 10px; gap: 6px; flex-shrink: 0;
+}
+.mw-dots { display: flex; gap: 5px; }
+.mw-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: #444;
+}
+.mw-dot--close { background: #e84040; cursor: pointer; }
+.mw-dot--close:hover { background: #ff5050; }
+.mw-title-text { flex: 1; text-align: center; font-size: 11px; color: #777; }
+.mw-body { padding: 14px 16px; overflow-y: auto; flex: 1; }
+.mw-footer {
+    padding: 10px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: flex-end; gap: 6px; flex-shrink: 0;
+}
+
+/* Buttons inside modals */
+.mw-btn {
+    padding: 4px 12px; border-radius: 3px; border: none;
+    cursor: pointer; font-size: 11px; font-family: monospace;
+    transition: background 0.12s;
+}
+.mw-btn--ghost  { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: #888; }
+.mw-btn--ghost:hover { border-color: rgba(255,255,255,0.25); color: #ccc; }
+.mw-btn--primary { background: #0e639c; color: #fff; }
+.mw-btn--primary:hover { background: #1177bb; }
+.mw-btn--danger  { background: #5a0000; color: #f48771; border: 1px solid rgba(244,135,113,0.25); }
+.mw-btn--danger:hover { background: #7a0000; }
+
+/* Project list in modals */
+.mw-proj-list { display: flex; flex-direction: column; gap: 3px; margin-bottom: 4px; }
+.mw-proj-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: 3px; cursor: pointer;
+    border: 1px solid transparent;
+}
+.mw-proj-item:hover { background: rgba(255,255,255,0.05); }
+.mw-proj-item--active { background: rgba(79,193,255,0.07); border-color: rgba(79,193,255,0.2); }
+.mw-proj-dot { width: 6px; height: 6px; border-radius: 50%; background: #444; flex-shrink: 0; }
+.mw-proj-dot--active { background: #4fc1ff; }
+.mw-proj-name { flex: 1; font-size: 12px; color: #ccc; }
+.mw-proj-branch {
+    font-size: 10px; color: #73c991;
+    background: rgba(115,201,145,0.1); padding: 1px 5px; border-radius: 2px;
+}
+
+/* Fields */
+.mw-field { margin-bottom: 10px; }
+.mw-field-label { font-size: 10px; color: #888; margin-bottom: 4px; }
+.mw-field-input {
+    width: 100%; background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.1); color: #ccc;
+    padding: 5px 8px; border-radius: 3px; font-size: 11px; font-family: monospace;
+}
+.mw-field-input:focus { outline: none; border-color: #4fc1ff; }
+
+/* Type picker grid */
+.mw-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 4px; }
+.mw-type-card {
+    padding: 8px 10px; border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+    transition: border-color 0.12s;
+}
+.mw-type-card:hover { border-color: rgba(255,255,255,0.25); }
+.mw-type-card--selected { border-color: #4fc1ff; background: rgba(79,193,255,0.06); }
+.mw-type-name { font-size: 11px; color: #ccc; font-weight: 600; margin-bottom: 2px; }
+.mw-type-desc { font-size: 10px; color: #666; }
+
+/* Warning box */
+.mw-warn-box {
+    background: rgba(244,135,113,0.07);
+    border: 1px solid rgba(244,135,113,0.2);
+    border-radius: 4px; padding: 10px 12px;
+    font-size: 11px; color: #f48771; line-height: 1.6;
+}
+
+/* Raw JSON toggle */
+.mw-raw-toggle { font-size: 10px; color: #555; cursor: pointer; margin: 8px 0 4px; }
+.mw-raw-toggle:hover { color: #888; }
+.mw-raw-json {
+    background: #1a1a1a; border-radius: 3px; padding: 8px;
+    font-size: 10px; color: #888; white-space: pre-wrap; overflow-y: auto; max-height: 160px;
+}
+
+/* ── Wizard ──────────────────────────────────────────── */
+.wiz-step-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.wiz-lbl { font-size: 10px; color: #555; }
+.wiz-lbl--active { color: #4fc1ff; }
+.wiz-lbl--done   { color: #0e639c; }
+.wiz-step-bar { display: flex; gap: 2px; margin-bottom: 12px; }
+.wiz-seg { flex: 1; height: 2px; background: rgba(255,255,255,0.1); }
+.wiz-seg--active { background: #4fc1ff; }
+.wiz-seg--done   { background: #0e639c; }
+.wiz-body { margin-bottom: 4px; }
+.wiz-footer { display: flex; justify-content: flex-end; gap: 6px; margin-top: 12px; }
+
+/* ── Context menu ────────────────────────────────────── */
+.ctx-menu {
+    background: #252526; border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px; padding: 3px 0; min-width: 160px;
+}
+.ctx-item {
+    padding: 4px 10px; font-size: 11px; color: #bbb;
+    cursor: pointer; display: flex; align-items: center;
+}
+.ctx-item:hover { background: rgba(255,255,255,0.07); }
+.ctx-item--danger { color: #f48771; }
+.ctx-item--danger:hover { background: rgba(244,135,113,0.08); }
+.ctx-sep { height: 1px; background: rgba(255,255,255,0.07); margin: 3px 0; }
+
+/* ── Explorer inline input ───────────────────────────── */
+.explorer-inline-input {
+    flex: 1; background: #1a1a1a;
+    border: 1px solid #4fc1ff; color: #ccc;
+    padding: 1px 4px; border-radius: 2px;
+    font-size: 11px; font-family: monospace; outline: none;
+}
+
+/* ── FilePicker ──────────────────────────────────────── */
+.fp-crumb {
+    display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+    background: #1a1a1a; border: 1px solid rgba(255,255,255,.08);
+    border-radius: 3px; padding: 3px 7px; font-size: 10px; color: #888;
+    margin-bottom: 7px;
+}
+.fp-crumb-seg { color: #aaa; cursor: pointer; }
+.fp-crumb-seg:last-child { color: #4fc1ff; cursor: default; }
+.fp-crumb-seg:not(:last-child):hover { color: #ccc; }
+.fp-crumb-sep { color: #444; margin: 0 1px; }
+
+.fp-count {
+    font-size: 10px; color: #888; margin-bottom: 5px;
+}
+
+.fp-tree {
+    border: 1px solid rgba(255,255,255,.08); border-radius: 3px;
+    padding: 3px 0; max-height: 200px; overflow-y: auto;
+    margin-bottom: 6px;
+}
+
+.fp-row {
+    display: flex; align-items: center; gap: 4px;
+    padding: 2px 8px; cursor: pointer; border-radius: 2px;
+    user-select: none; font-size: 11px; color: #bbb;
+}
+.fp-row:hover { background: rgba(255,255,255,.06); }
+.fp-row--selected { background: rgba(79,193,255,.12); outline: 1px solid rgba(79,193,255,.3); }
+.fp-icon { font-size: 11px; flex-shrink: 0; }
+.fp-name { flex: 1; }
+.fp-cb { width: 12px; height: 12px; flex-shrink: 0; accent-color: #4fc1ff; cursor: pointer; }
+.fp-hint { font-size: 10px; color: #555; }
+
+.fp-browse-btn {
+    width: 24px; height: 24px; flex-shrink: 0;
+    background: transparent; border: 1px solid rgba(255,255,255,.12);
+    color: #777; border-radius: 3px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .12s, color .12s;
+}
+.fp-browse-btn:hover { border-color: rgba(255,255,255,.3); color: #ccc; }
+
+/* ── Commit modal extras ─────────────────────────────── */
+.mw-staged-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; margin-bottom: 8px;
+}
+.mw-link { color: #555; cursor: pointer; font-size: 10px; }
+.mw-link:hover { color: #888; }
+.mw-check-row {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 11px; color: #bbb; margin-bottom: 5px;
+}
+.mw-check-row input { accent-color: #4fc1ff; }
+.mw-textarea {
+    width: 100%; background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,.1); color: #ccc;
+    padding: 5px 7px; border-radius: 3px;
+    font-size: 11px; font-family: monospace;
+    resize: vertical; min-height: 44px; margin-bottom: 8px;
+    transition: opacity .15s;
+}
+.mw-textarea:focus { outline: none; border-color: #4fc1ff; }
+
+/* ── IDESettings ─────────────────────────────────────── */
+.mw-raw-toggle { font-size: 10px; color: #555; cursor: pointer; margin: 6px 0 3px; }
+.mw-raw-toggle:hover { color: #888; }
