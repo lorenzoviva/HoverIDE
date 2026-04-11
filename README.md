@@ -133,25 +133,28 @@ Real Applications (Node, Browser, etc.)
 
 ### 🖼 Main Overlay Interface
 
-> Screenshot: Show the full IDE overlay on top of a running web app (editor + explorer + header visible)
-
+![](images/Screenshot1.png)
+> The little "H" button on the bottom right opens the overlying IDE
 ---
 
 ### 🖼 File Explorer & Git Status
 
-> Screenshot: Show file tree with colored files indicating git changes
+![](images/Screenshot2.png)
+> File tree with colored files indicating git changes
 
 ---
 
 ### 🖼 Editor + Live HTML Sync
 
-> Screenshot: Open an HTML file and show DOM updates syncing in real-time
+![](images/Screenshot3.png)
+> Project creation window
 
 ---
 
-### 🖼 Project & Systems Menu
+### 🖼 Context menu
 
-> Screenshot: Open the top menu showing systems list and project options
+![](images/Screenshot4.png)
+> Modern IDE features 
 
 ---
 
