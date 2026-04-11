@@ -12,22 +12,18 @@ const router = express.Router();
 // OPEN PROJECT
 ///////////////////////////////////////////////////////////
 
-router.post("/open", (req, res) => {
-  const { name } = req.body;
-
-  try {
-    const project = ProjectService.load(name);
-
-    // set active project
-    WorkspaceService.setProject(project);
-
-    res.json(project);
-
-  } catch (e) {
-    res.status(400).json({ error: e.message });
-  }
+router.post("/open", async (req, res) => {
+    try {
+        const project = ProjectService.load(req.body.name);
+        WorkspaceService.setProject(project);
+        // Restart runtime for new project
+        await systemRuntime.initProject(project);
+        await scriptEngine.loadProject(project);
+        res.json(project);
+    } catch (e) {
+        res.status(400).json({ error: e.message });
+    }
 });
-
 
 ///////////////////////////////////////////////////////////
 // GET CURRENT PROJECT

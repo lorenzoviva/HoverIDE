@@ -7,11 +7,12 @@ import SidebarManager from "./components/Sidebar/SidebarManager.js";
 import { setProject, hasProject } from "./core/ProjectStore.js";
 import { getCurrentProject } from "./services/ProjectService.js";
 import { on, emit } from "./core/EventBus.js";
+import { connectBackendBridge } from "./services/Bridge.js";
 
 let explorer, editor, header;
 
 async function bootstrap() {
-
+    connectBackendBridge();
     //////////////////////////////////////////////////////
     // Mount base UI (always)
     //////////////////////////////////////////////////////

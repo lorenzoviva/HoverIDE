@@ -1,9 +1,9 @@
-import VanillaES6Frontend     from "./VanillaES6Frontend.js";
-import NodeJSBackend          from "./NodeJSBackend.js";
-import ChromeExtension        from "./ChromeExtension.js";
-import ChromeExtensionPopup   from "./ChromeExtensionPopup.js";
-import HoverIDEFrontend       from "./HoverIDEFrontend.js";
-import HoverIDEBackend        from "./HoverIDEBackend.js";
+import VanillaES6Frontend   from "./VanillaES6Frontend.js";
+import NodeJSBackend        from "./NodeJSBackend.js";
+import ChromeExtension      from "./ChromeExtension.js";
+import ChromeExtensionPopup from "./ChromeExtensionPopup.js";
+import HoverIDEFrontend     from "./HoverIDEFrontend.js";
+import HoverIDEBackend      from "./HoverIDEBackend.js";
 
 const REGISTRY = {
     VanillaES6Frontend,
@@ -14,6 +14,16 @@ const REGISTRY = {
     HoverIDEBackend,
 };
 
+// Lazy-loaded adapter map — avoids circular imports and loads only what's needed
+const ADAPTER_MAP = {
+    VanillaES6Frontend:   () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
+    HoverIDEFrontend:     () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
+    NodeJSBackend:        () => import("./adapters/NodeJSAdapter.js").then(m => m.default),
+    HoverIDEBackend:      () => import("./adapters/NodeJSAdapter.js").then(m => m.default),
+    ChromeExtension:      () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
+    ChromeExtensionPopup: () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
+};
+
 export default class SystemRegistry {
 
     static create(type, args) {
@@ -22,13 +32,19 @@ export default class SystemRegistry {
         return new Cls(args);
     }
 
-    // Deserialise a plain JSON object back into a typed instance
     static fromJSON(raw) {
         return SystemRegistry.create(raw.type, raw);
     }
 
-    static register(name, cls) {
+    static async getAdapter(type) {
+        const loader = ADAPTER_MAP[type];
+        if (!loader) return null;
+        return loader();
+    }
+
+    static register(name, cls, adapterLoader = null) {
         REGISTRY[name] = cls;
+        if (adapterLoader) ADAPTER_MAP[name] = adapterLoader;
     }
 
     static types() {
