@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-
+import os from "os";
 export default class FileSystemAdapter {
 
     static read(filePath) {
@@ -29,6 +29,11 @@ export default class FileSystemAdapter {
     }
 
     static ls(dirPath) {
+        // virtual root handling
+        if (!dirPath || dirPath === "/") {
+            return this.listRoots();
+        }
+
         return fs.readdirSync(dirPath, { withFileTypes: true })
             .filter(e => !e.name.startsWith("."))
             .map(e => ({
@@ -54,4 +59,28 @@ export default class FileSystemAdapter {
     static mkdir(dirPath) {
         fs.mkdirSync(dirPath, { recursive: true });
     }
+
+   static listRoots() {
+       // Windows → drives
+       if (process.platform === "win32") {
+           const drives = [];
+
+           for (let c = 65; c <= 90; c++) {
+               const drive = String.fromCharCode(c) + ":/";
+               try {
+                   fs.accessSync(drive);
+                   drives.push({
+                       name: drive.replace("/", ""), // "C:"
+                       path: drive,
+                       isDir: true
+                   });
+               } catch {}
+           }
+
+           return drives;
+       }
+
+       // Unix → root is real root
+       return this.ls("/");
+   }
 }

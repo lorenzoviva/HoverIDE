@@ -144,28 +144,39 @@ export default class FilePicker {
 
     _confirm() {
         const result = this.multi ? [...this._selected] : this._singleSelected;
-        this._win.close();
         this._resolve((Array.isArray(result) && !result.length) ? null : result || null);
+        this._win.close();
     }
 
     _updateCrumb() {
         this._crumbEl.innerHTML = "";
+
+        // ROOT node
+        const rootSeg = document.createElement("span");
+        rootSeg.className = "fp-crumb-seg";
+        rootSeg.textContent = "root";
+        rootSeg.onclick = () => this._loadDir("/");
+        this._crumbEl.appendChild(rootSeg);
+
         const parts = this._cwd.replace(/\\/g, "/").split("/").filter(Boolean);
+
         let cum = "";
         parts.forEach((part, i) => {
             cum += (i === 0 ? "" : "/") + part;
+
+            const sep = document.createElement("span");
+            sep.className = "fp-crumb-sep";
+            sep.textContent = "/";
+            this._crumbEl.appendChild(sep);
+
             const seg = document.createElement("span");
             seg.className = "fp-crumb-seg";
             seg.textContent = part;
+
             const cap = cum;
             seg.onclick = () => this._loadDir(cap);
+
             this._crumbEl.appendChild(seg);
-            if (i < parts.length - 1) {
-                const sep = document.createElement("span");
-                sep.className = "fp-crumb-sep";
-                sep.textContent = "/";
-                this._crumbEl.appendChild(sep);
-            }
         });
     }
 
@@ -181,6 +192,13 @@ export default class FilePicker {
 
     _parentOf(p) {
         const s = p.replace(/\\/g, "/");
-        return s.substring(0, s.lastIndexOf("/")) || this.root;
+
+        // if already at drive root -> go back to "/"
+        if (/^[A-Z]:\/?$/i.test(s)) {
+            return "/";
+        }
+
+        const idx = s.lastIndexOf("/");
+        return idx > 0 ? s.substring(0, idx) : this.root;
     }
 }

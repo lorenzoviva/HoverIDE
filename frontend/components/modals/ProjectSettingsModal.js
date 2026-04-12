@@ -1,7 +1,12 @@
 import ModalWindow from "../../core/ModalWindow.js";
+import BrowseField from "../../core/BrowseField.js";
 import { getProject } from "../../core/ProjectStore.js";
 import { emit } from "../../core/EventBus.js";
 
+const BROWSE_FIELDS = [
+    "rootPath",
+    "localPath"
+]
 const FIELDS = [
     { key: "name",           label: "Project name" },
     { key: "projectGit",     label: "Project git URL" },
@@ -25,11 +30,16 @@ export default class ProjectSettingsModal {
         const body = document.createElement("div");
 
         FIELDS.forEach(({ key, label }) => {
-            const f = document.createElement("div");
-            f.className = "mw-field";
-            f.innerHTML = `<div class="mw-field-label">${label}</div>
-                <input class="mw-field-input" data-key="${key}" value="${project[key] || ""}" />`;
-            body.appendChild(f);
+            if(BROWSE_FIELDS.includes(key)) {
+                const folderField  = BrowseField.create({ label, key,  placeholder: project[key], value: project[key], mode: "folder" });
+                 body.appendChild(folderField.wrapper);
+            } else {
+                const f = document.createElement("div");
+                f.className = "mw-field";
+                f.innerHTML = `<div class="mw-field-label">${label}</div>
+                    <input class="mw-field-input" data-key="${key}" value="${project[key] || ""}" />`;
+                body.appendChild(f);
+            }
         });
 
         const toggle = document.createElement("div");

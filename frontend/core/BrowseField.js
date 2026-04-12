@@ -43,7 +43,7 @@ export default class BrowseField {
 
     // Convenience: create a full labeled field with browse button
     // Returns { wrapper, input }
-    static create({ label, key, placeholder = "", mode = "both", multi = false }) {
+    static create({ label, key, value = "", placeholder = "", mode = "both", multi = false }) {
         const wrapper = document.createElement("div");
         wrapper.className = "mw-field";
 
@@ -57,6 +57,7 @@ export default class BrowseField {
         const input = document.createElement("input");
         input.className = "mw-field-input";
         input.dataset.key = key;
+        input.value = value;
         input.placeholder = placeholder;
 
         inputWrap.appendChild(input);

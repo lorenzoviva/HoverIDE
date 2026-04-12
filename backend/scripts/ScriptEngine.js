@@ -2,7 +2,7 @@ import vm from "vm";
 import fs from "fs";
 import path from "path";
 import eventBus from "../core/EventBus.js";
-
+import { NODE_RUNTIME_DIR } from "../utils/const.js"
 class ScriptEngine {
 
     constructor() {
@@ -14,7 +14,7 @@ class ScriptEngine {
         await this.unloadAll();
         this._projectPath = project.localPath;
         // TO-DO: REPLACE roject.rootPath with HoverIDE path
-        const scriptsDir = path.join(project.rootPath, ".hoverscripts", project.name);
+        const scriptsDir = path.join(NODE_RUNTIME_DIR, "..", ".hoverscripts", project.name);
         if (!fs.existsSync(scriptsDir)) fs.mkdirSync(scriptsDir, { recursive: true });
 
         for (const file of fs.readdirSync(scriptsDir)) {

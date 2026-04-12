@@ -67,9 +67,11 @@ router.get("/list", (req, res) => {
 // Directory listing for FilePicker — absolute path, not project-relative
 router.get("/ls", (req, res) => {
     try {
-        const entries = FileSystemAdapter.ls(req.query.path || "/");
+        const entries = FileSystemAdapter.ls(req.query.path);
         res.json(entries);
-    } catch (e) { res.status(400).json({ error: e.message }); }
+    } catch (e) {
+        res.status(400).json({ error: e.message });
+    }
 });
 
 
