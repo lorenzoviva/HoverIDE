@@ -17,9 +17,9 @@ const REGISTRY = {
 // Lazy-loaded adapter map — avoids circular imports and loads only what's needed
 const ADAPTER_MAP = {
     VanillaES6Frontend:   () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
-    HoverIDEFrontend:     () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
+    HoverIDEFrontend:     () => import("./adapters/HoverIDEAdapter.js").then(m => m.default),
     NodeJSBackend:        () => import("./adapters/NodeJSAdapter.js").then(m => m.default),
-    HoverIDEBackend:      () => import("./adapters/NodeJSAdapter.js").then(m => m.default),
+    HoverIDEBackend:      () => import("./adapters/HoverIDEAdapter.js").then(m => m.default),
     ChromeExtension:      () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
     ChromeExtensionPopup: () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
 };

@@ -4,6 +4,7 @@ import SystemRegistry from "../systems/SystemRegistry.js";
 import ProjectService from "../services/ProjectService.js";
 import WorkspaceService from "../services/WorkspaceService.js";
 import systemRuntime from "../services/SystemRuntimeService.js";
+import eventBus from "../core/EventBus.js";
 
 const router = express.Router();
 
@@ -18,21 +19,26 @@ router.post("/add", async (req, res) => {
         const system  = SystemService.create(type, config);
         project.systems.push(system);
         ProjectService.save(project);
-        // Start the adapter for the newly added system
+
+        // Start the adapter
         await systemRuntime._initSystem(system);
+
+        // Notify all connected IDE frontends via SSE
+        eventBus.dispatch({
+            type:    "project.systems.changed",
+            payload: { projectName, system: system.toJSON() },
+        });
+
         res.json(system);
     } catch (e) {
         res.status(400).json({ error: e.message });
     }
 });
 
-// Execute an adapter action (e.g. restart, listRoutes)
 router.post("/:systemId/execute", async (req, res) => {
     try {
         const result = await systemRuntime.executeAction(
-            req.params.systemId,
-            req.body.action,
-            req.body.payload || {}
+            req.params.systemId, req.body.action, req.body.payload || {}
         );
         res.json({ result: result ?? null });
     } catch (e) {
@@ -40,7 +46,6 @@ router.post("/:systemId/execute", async (req, res) => {
     }
 });
 
-// Get a runtime scan of the system
 router.get("/:systemId/scan", async (req, res) => {
     try {
         const result = await systemRuntime.scanSystem(req.params.systemId);
