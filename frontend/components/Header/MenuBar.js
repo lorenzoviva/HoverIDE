@@ -31,8 +31,8 @@ export default class MenuBar {
     }
 
     async _rebuild() {
-        this._bar.innerHTML = "";
         const menus = await this._buildMenus();
+        this._bar.innerHTML = "";
         menus.forEach(menu => {
             this._bar.appendChild(new Dropdown(menu.label, menu.items).render());
         });

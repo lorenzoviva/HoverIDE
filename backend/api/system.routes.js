@@ -19,6 +19,7 @@ router.post("/add", async (req, res) => {
         const system  = SystemService.create(type, config);
         project.systems.push(system);
         ProjectService.save(project);
+        WorkspaceService.setProject(project)
 
         // Start the adapter
         await systemRuntime._initSystem(system);
