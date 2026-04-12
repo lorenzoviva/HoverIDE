@@ -13,6 +13,7 @@ import hoverideRoutes from "./api/hoveride.routes.js";
 import fileRoutes from "./api/file.routes.js";
 import vcsRoutes from "./api/vcs.routes.js";
 import eventsRoutes     from "./api/events.routes.js";
+import scriptsRoutes from "./api/scripts.routes.js";
 
 import eventBus        from "./core/EventBus.js";
 import systemRuntime   from "./services/SystemRuntimeService.js";
@@ -40,6 +41,7 @@ app.use("/api/git", gitRoutes);
 app.use("/api/hoveride", hoverideRoutes);
 app.use("/api/vcs", vcsRoutes);
 app.use("/api/file", fileRoutes);
+app.use("/api/scripts", scriptsRoutes);
 
 app.use("/api/events", eventsRoutes);
 

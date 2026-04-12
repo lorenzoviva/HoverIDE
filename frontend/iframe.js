@@ -85,13 +85,7 @@ async function bootstrap() {
         const { default: CommitModal } = await import("./components/modals/CommitModal.js");
         const { vcsCommit } = await import("./services/FileService.js");
 
-        // Let user pick files to stage
-        const picker = new FilePicker({ mode: "file", multi: true, root: "/" });
-        const files = await picker.open();
-        if (!files?.length) return;
-
         new CommitModal().open({
-            files,
             onCommit: async ({ message, mergeMessage }) => {
                 const res = await vcsCommit({ message, mergeMessage });
                 if (!res.ok) {

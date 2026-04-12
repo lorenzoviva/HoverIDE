@@ -796,3 +796,10 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 /* ── IDESettings ─────────────────────────────────────── */
 .mw-raw-toggle { font-size: 10px; color: #555; cursor: pointer; margin: 6px 0 3px; }
 .mw-raw-toggle:hover { color: #888; }
+
+/* ── Commit file list ────────────────────────────────── */
+.fp-row .fp-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

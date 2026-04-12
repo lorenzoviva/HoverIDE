@@ -5,8 +5,12 @@ import CreateProjectModal   from "../modals/CreateProjectModal.js";
 import ProjectSettingsModal from "../modals/ProjectSettingsModal.js";
 import AddSystemModal       from "../modals/AddSystemModal.js";
 import ChangeBranchModal    from "../modals/ChangeBranchModal.js";
-import IDESettingsModal    from "../modals/IDESettingsModal.js";
+import IDESettingsModal     from "../modals/IDESettingsModal.js";
+import SystemSettingsModal  from "../modals/SystemSettingsModal.js";
+import SystemScanModal      from "../modals/SystemScanModal.js";
+import HoverScriptsModal    from "../modals/HoverScriptsModal.js";
 import { getCurrentProject } from "../../services/ProjectService.js";
+import { on } from "../../core/EventBus.js";
 
 export default class MenuBar {
 
@@ -16,14 +20,13 @@ export default class MenuBar {
         this._bar = bar;
         await this._rebuild();
 
-        // Rebuild systems menu when systems change
-        document.addEventListener("ide:project:systems:changed", () => this._rebuild());
-        document.addEventListener("ide:project:changed",         () => this._rebuild());
+        on("project:changed",         () => this._rebuild());
+        on("project:systems:changed", () => this._rebuild());
 
         return bar;
     }
 
-    openOpenProjectModal(){
+    openOpenProjectModal() {
         new OpenProjectModal().open();
     }
 
@@ -36,16 +39,17 @@ export default class MenuBar {
     }
 
     async _buildMenus() {
-        const project = await getCurrentProject();;
+        let project = null;
+        try { project = await getCurrentProject(); } catch { /* no project */ }
 
-        return [
+        const menus = [
             {
                 label: "HoverIDE",
                 items: [
                     { label: "Change branch",  action: () => new ChangeBranchModal().open() },
                     { label: "Edit HoverIDE",  action: () => this._editHoverIDE() },
-                    { label: "Settings",      action: () => new IDESettingsModal().open() },  // ← new
-                ]
+                    { label: "Settings",       action: () => new IDESettingsModal().open() },
+                ],
             },
             {
                 label: "Project",
@@ -53,42 +57,94 @@ export default class MenuBar {
                     { label: "Open project",    action: () => new OpenProjectModal().open() },
                     { label: "Create project",  action: () => new CreateProjectModal().open() },
                     ...(project ? [
-                        { label: "Add system",      action: () => new AddSystemModal().open() },
-                        { label: "Project settings",action: () => new ProjectSettingsModal().open() },
+                        { label: "Add system",       action: () => new AddSystemModal().open() },
+                        { label: "Project settings", action: () => new ProjectSettingsModal().open() },
                     ] : []),
-                ]
+                ],
             },
-            {
+        ];
+
+        // Systems menu — one entry per system with submenu
+        if (project?.systems?.length) {
+            menus.push({
                 label: "Systems",
-                items: project?.systems?.length
-                    ? project.systems.map(sys => ({
-                        label: sys.id || sys.type,
-                        submenu: this._systemMenu(sys),
-                    }))
-                    : [{ label: "No systems", action: () => {} }]
-            }
+                items: project.systems.map(sys => ({
+                    label: sys.id || sys.type,
+                    submenu: this._systemSubmenu(sys),
+                })),
+            });
+        } else {
+            menus.push({
+                label: "Systems",
+                items: [
+                    { label: "No systems — add one via Project", action: () => {} },
+                ],
+            });
+        }
+
+        // HoverScripts menu
+        menus.push({
+            label: "HoverScripts",
+            items: [
+                { label: "Manage scripts", action: () => new HoverScriptsModal().open() },
+                ...(project ? [
+                    { label: "New script",     action: () => this._newScript(project) },
+                    { label: "Reload all",     action: () => this._reloadAllScripts() },
+                ] : []),
+            ],
+        });
+
+        return menus;
+    }
+
+    _systemSubmenu(sys) {
+        return [
+            { label: "Settings",     action: () => new SystemSettingsModal().open(sys) },
+            { label: "Scan",         action: () => new SystemScanModal().open(sys) },
+            { label: "Restart adapter", action: () => this._executeAction(sys, "restart") },
         ];
     }
 
-    _systemMenu(sys) {
-        return [
-            { label: "List files",  action: () => emit("system:list-files", sys) },
-            { label: "Pages/URLs",  action: () => emit("system:pages", sys) },
-        ];
+    async _executeAction(sys, action) {
+        try {
+            const res = await fetch(`/api/system/${sys.id}/execute`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action }),
+            });
+            if (!res.ok) throw new Error((await res.json()).error);
+        } catch (e) {
+            alert(`Action "${action}" failed: ${e.message}`);
+        }
+    }
+
+    async _newScript(project) {
+        const name = prompt("Script name (e.g. my-script.js):");
+        if (!name) return;
+        const filename = name.endsWith(".js") ? name : `${name}.js`;
+        await fetch("/api/scripts/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: filename }),
+        });
+        emit("file:open", `.hoverscripts/${filename}`);
+    }
+
+    async _reloadAllScripts() {
+        // Unload then reload all — the engine re-scans the .hoverscripts dir
+        await fetch("/api/scripts/reload-all", { method: "POST" }).catch(() => {});
     }
 
     _editHoverIDE() {
-        const win = document.createElement("div");
-        win.innerHTML = `<div style="font-size:11px;color:#ccc;margin-bottom:12px">
-            This will open the HoverIDE project, replacing the current project context.
-        </div>`;
-
         import("../../core/ModalWindow.js").then(({ default: ModalWindow }) => {
-            const modal = new ModalWindow({ title: "Edit HoverIDE", width: 340 });
-            modal.render();
-            modal.setContent(win);
-            modal.addFooterBtn("Cancel", "mw-btn--ghost", () => modal.close());
-            modal.addFooterBtn("Open HoverIDE", "mw-btn--primary", async () => {
+            const win = new ModalWindow({ title: "Edit HoverIDE", width: 340 });
+            win.render();
+            const body = document.createElement("div");
+            body.style.cssText = "font-size:11px;color:#ccc;line-height:1.6";
+            body.textContent = "This will open the HoverIDE project, replacing the current context.";
+            win.setContent(body);
+            win.addFooterBtn("Cancel", "mw-btn--ghost", () => win.close());
+            win.addFooterBtn("Open HoverIDE", "mw-btn--primary", async () => {
                 const res = await fetch("/api/project/open", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -96,12 +152,11 @@ export default class MenuBar {
                 });
                 const project = await res.json();
                 const { setProject } = await import("../../core/ProjectStore.js");
-                const { emit } = await import("../../core/EventBus.js");
                 setProject(project);
                 emit("project:changed", project);
-                modal.close();
+                win.close();
             });
-            modal.show();
+            win.show();
         });
     }
 }
