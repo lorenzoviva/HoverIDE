@@ -1,7 +1,6 @@
 # 🚀 HoverIDE
 
 > The next-generation **Overlay IDE** for full-stack, runtime-aware development
-  
 ---
 
 ## ✨ What is HoverIDE?
