@@ -1,7 +1,7 @@
 # 🚀 HoverIDE
 
 > The next-generation **Overlay IDE** for full-stack, runtime-aware development
-
+  
 ---
 
 ## ✨ What is HoverIDE?
@@ -10,7 +10,7 @@ HoverIDE is a **browser-based IDE overlay** that sits on top of your running app
 
 * 🧠 Understand your system in real-time
 * ⚡ Edit code directly in context
-* 🔗 Connect frontend, backend, and runtime behavior
+* 🔗 Connect frontend, bacdkend, and runtime behavior
 * 🛠 Automate workflows with scripts
 
 Unlike traditional IDEs, HoverIDE doesn't just edit code — it **understands your application while it's running**.
