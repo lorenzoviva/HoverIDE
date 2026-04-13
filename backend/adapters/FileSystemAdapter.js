@@ -27,7 +27,27 @@ export default class FileSystemAdapter {
         }
         return walk(dir);
     }
-
+    static listWithDirs(dir) {
+        const results = [];
+        const walk = (d) => {
+            const entries = fs.readdirSync(d, { withFileTypes: true });
+            // If directory is completely empty, still record it
+            if (entries.length === 0) {
+                results.push({ path: d, isDir: true });
+                return;
+            }
+            for (const entry of entries) {
+                const full = path.join(d, entry.name);
+                if (entry.isDirectory()) {
+                    walk(full);
+                } else {
+                    results.push({ path: full, isDir: false });
+                }
+            }
+        };
+        walk(dir);
+        return results;
+    }
     static ls(dirPath) {
         // virtual root handling
         if (!dirPath || dirPath === "/") {
@@ -48,7 +68,11 @@ export default class FileSystemAdapter {
     }
 
     static delete(filePath) {
-        fs.unlinkSync(filePath);
+        if (fs.statSync(filePath).isDirectory()) {
+            fs.rmdirSync(filePath);
+        } else {
+            fs.unlinkSync(filePath);
+        }
     }
 
     static create(filePath) {
@@ -58,6 +82,11 @@ export default class FileSystemAdapter {
 
     static mkdir(dirPath) {
         fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    static rename(from, to) {
+        fs.mkdirSync(path.dirname(to), { recursive: true });
+        fs.renameSync(from, to);
     }
 
    static listRoots() {

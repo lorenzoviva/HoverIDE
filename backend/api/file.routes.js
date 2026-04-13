@@ -55,6 +55,17 @@ router.post("/create", (req, res) => {
   res.sendStatus(200);
 });
 
+// CREATE FOLDER
+router.post("/mkdir", (req, res) => {
+  const { path: filePath } = req.body;
+
+  const fullPath = resolvePath(filePath);
+
+  FileSystemAdapter.mkdir(fullPath);
+
+  res.sendStatus(200);
+});
+
 // LIST FILES
 router.get("/list", (req, res) => {
   const projectPath = resolvePath(".");
@@ -74,6 +85,30 @@ router.get("/ls", (req, res) => {
     }
 });
 
+// List files AND empty directories
+router.get("/list-with-dirs", (req, res) => {
+    try {
+        const projectPath = resolvePath(".");
+        const entries = FileSystemAdapter.listWithDirs(projectPath).map(e => ({
+            path:  path.relative(projectPath, e.path).replace(/\\/g, "/"),
+            isDir: e.isDir,
+        }));
+        res.json(entries);
+    } catch (e) {
+        res.status(400).json({ error: e.message });
+    }
+});
 
+// Rename / move
+router.post("/rename", (req, res) => {
+    try {
+        const from = resolvePath(req.body.from);
+        const to   = resolvePath(req.body.to);
+        FileSystemAdapter.rename(from, to);
+        res.sendStatus(200);
+    } catch (e) {
+        res.status(400).json({ error: e.message });
+    }
+});
 
 export default router;

@@ -4,6 +4,7 @@ import ChromeExtension      from "./ChromeExtension.js";
 import ChromeExtensionPopup from "./ChromeExtensionPopup.js";
 import HoverIDEFrontend     from "./HoverIDEFrontend.js";
 import HoverIDEBackend      from "./HoverIDEBackend.js";
+import DocumentationSystem from "./DocumentationSystem.js";
 
 const REGISTRY = {
     VanillaES6Frontend,
@@ -12,6 +13,7 @@ const REGISTRY = {
     ChromeExtensionPopup,
     HoverIDEFrontend,
     HoverIDEBackend,
+    DocumentationSystem,
 };
 
 // Lazy-loaded adapter map — avoids circular imports and loads only what's needed
@@ -22,6 +24,7 @@ const ADAPTER_MAP = {
     HoverIDEBackend:      () => import("./adapters/HoverIDEAdapter.js").then(m => m.default),
     ChromeExtension:      () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
     ChromeExtensionPopup: () => import("./adapters/VanillaES6Adapter.js").then(m => m.default),
+    DocumentationSystem: () => import("./adapters/DocsAdapter.js").then(m => m.default),
 };
 
 export default class SystemRegistry {

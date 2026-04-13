@@ -32,16 +32,23 @@ export default class NodeJSAdapter extends BaseAdapter {
 
     async scan() {
         const root = this.system.config.root;
+        const scripts = this._findJS(root);
+        const routes  = this._scanRoutes(root);
+
         return {
-            routes:       this._scanRoutes(root),
-            dependencies: this._readDependencies(root),
-            entryPoint:   this.system.config.startScript || null,
-            gitBranch:    this._git("git branch --show-current", root),
-            gitLog:       this._gitLog(root, 5),
+            root,
+            routes,
+            dependencies:  this._readDependencies(root),
+            entryPoint:    this.system.config.startScript || null,
+            gitBranch:     this._git("git branch --show-current", root),
+            gitLog:        this._gitLog(root, 5),
+            sources: {
+                scripts: this._readSources(scripts),
+            },
         };
     }
 
-    async execute(action, payload = {}) {
+    async execute(action) {
         switch (action) {
             case "restart":
                 this.emit("server.restarting", {});
@@ -72,14 +79,45 @@ export default class NodeJSAdapter extends BaseAdapter {
         this._watchers.push(watcher);
     }
 
+    _findJS(rootDir) {
+        const results = [];
+        if (!rootDir || !fs.existsSync(rootDir)) return results;
+        const walk = (dir) => {
+            for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+                if (e.name === "node_modules" || e.name.startsWith(".")) continue;
+                const full = path.join(dir, e.name);
+                if (e.isDirectory()) { walk(full); continue; }
+                if (e.name.endsWith(".js")) results.push(full.replace(/\\/g, "/"));
+            }
+        };
+        try { walk(rootDir); } catch { /* ignore */ }
+        return results;
+    }
+
+    _readSources(filePaths, maxSizeKB = 64) {
+        const sources = {};
+        for (const fp of filePaths) {
+            try {
+                const stat = fs.statSync(fp);
+                if (stat.size > maxSizeKB * 1024) {
+                    sources[fp] = { truncated: true, sizeKB: Math.round(stat.size / 1024) };
+                    continue;
+                }
+                sources[fp] = fs.readFileSync(fp, "utf-8");
+            } catch { /* skip */ }
+        }
+        return sources;
+    }
+
     _scanRoutes(rootDir) {
         const routes = [];
         if (!rootDir || !fs.existsSync(rootDir)) return routes;
         const walk = (dir) => {
-            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-                const full = path.join(dir, entry.name);
-                if (entry.isDirectory() && entry.name !== "node_modules") { walk(full); continue; }
-                if (!entry.name.endsWith(".js")) continue;
+            for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+                if (e.name === "node_modules") continue;
+                const full = path.join(dir, e.name);
+                if (e.isDirectory()) { walk(full); continue; }
+                if (!e.name.endsWith(".js")) continue;
                 try {
                     const src = fs.readFileSync(full, "utf-8");
                     for (const [, method, route] of src.matchAll(/router\.(get|post|put|patch|delete)\(["'`]([^"'`]+)/g)) {
@@ -95,7 +133,10 @@ export default class NodeJSAdapter extends BaseAdapter {
     _readDependencies(rootDir) {
         try {
             const pkg = JSON.parse(fs.readFileSync(path.join(rootDir, "package.json"), "utf-8"));
-            return { dependencies: Object.keys(pkg.dependencies || {}), devDependencies: Object.keys(pkg.devDependencies || {}) };
+            return {
+                dependencies:    Object.keys(pkg.dependencies    || {}),
+                devDependencies: Object.keys(pkg.devDependencies || {}),
+            };
         } catch { return {}; }
     }
 

@@ -2,7 +2,7 @@ import { emit } from "../../core/EventBus.js";
 
 export default class ExplorerContextMenu {
 
-    show(x, y, path, isLeaf) {
+    show(x, y, path, isFile, isFolder) {
         this._remove();
 
         const menu = document.createElement("div");
@@ -11,13 +11,13 @@ export default class ExplorerContextMenu {
 
         const items = [
             { label: "New file",   action: () => emit("file:create:at", path) },
-            ...(isLeaf ? [] : [{ label: "New folder", action: () => emit("folder:create:at", path) }]),
-            null,
-            { label: "Rename",  action: () => emit("file:rename", path) },
-            { label: "Delete",  action: () => emit("file:delete", path), danger: true },
-            null,
-            { label: "Copy path",  action: () => navigator.clipboard.writeText(path) },
-            { label: "Link to page resource", action: () => emit("resource:link", path) },
+            { label: "New folder", action: () => emit("folder:create:at", path) },
+            ...(isFile || isFolder  ? [null] : []),
+            ...(isFile || isFolder  ? [{ label: "Rename",  action: () => emit("file:rename", path) }] : []),
+            ...(isFile || isFolder  ? [{ label: "Delete",  action: () => emit("file:delete", path), danger: true }] : []),
+            ...(isFile || isFolder  ? [null] : []),
+            ...(isFile || isFolder  ? [{ label: "Copy path",  action: () => navigator.clipboard.writeText(path) }] : []),
+            ...(isFile  ? [{ label: "Link to page resource", action: () => emit("resource:link", path) }] : []),
         ];
 
         items.forEach(item => {

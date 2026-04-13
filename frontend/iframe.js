@@ -8,6 +8,7 @@ import { setProject, hasProject } from "./core/ProjectStore.js";
 import { getCurrentProject } from "./services/ProjectService.js";
 import { on, emit } from "./core/EventBus.js";
 import { connectBackendBridge } from "./services/Bridge.js";
+import scriptEngine from "./core/ScriptEngine.js";
 
 let explorer, editor, header;
 
@@ -54,16 +55,15 @@ async function bootstrap() {
 
     try {
         const project = await getCurrentProject();
-        if(project && !project.error) {
-            console.log("Loading project: ", project)
+        if (project && !project.error) {
             setProject(project);
-            console.log("Loaded UI for project")
             await explorer.mount();
+            await scriptEngine.loadAll();   // first load — fetches once
         } else {
             header.openOpenProjectModal();
         }
     } catch {
-           header.openOpenProjectModal();
+        header.openOpenProjectModal();
     }
 
     //////////////////////////////////////////////////////
@@ -72,7 +72,11 @@ async function bootstrap() {
 
     on("project:changed", async () => {
         await explorer.mount();
+        await scriptEngine.reloadAll();  // force=true, clears cache
     });
+
+    // SSE-driven reload (e.g. script file saved on disk)
+    on("backend:scripts.changed", () => scriptEngine.reloadAll());
 
     on("project:cleared", () => {
         header.openOpenProjectModal();

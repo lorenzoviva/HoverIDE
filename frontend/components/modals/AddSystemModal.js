@@ -21,6 +21,9 @@ const SYSTEM_CONFIGS = {
         { key: "root",     label: "Root path",  placeholder: "extension" },
         { key: "popupUrl", label: "Popup URL",   placeholder: "chrome-extension://…/popup.html" },
     ],
+    DocumentationSystem: [
+        { key: "root", label: "Docs root path", placeholder: "." },
+    ],
     HoverIDEFrontend: [],
     HoverIDEBackend:  [],
 };

@@ -254,6 +254,8 @@ This means:
 
 * [ ] Event inspector panel
 * [ ] Script debugger
+* [ ] Console
+* [ ] Context menus
 * [ ] Better UI/UX
 
 ### 🌐 Integration

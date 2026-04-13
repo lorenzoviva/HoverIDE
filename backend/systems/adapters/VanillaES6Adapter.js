@@ -27,13 +27,26 @@ export default class VanillaES6Adapter extends BaseAdapter {
 
     async scan() {
         const root = this.system.config.root;
+        if (!root || !fs.existsSync(root)) return {};
+
+        const scripts    = this._findByExt(root, ".js");
+        const styles     = this._findByExt(root, ".css");
+        const html       = this._findByExt(root, ".html");
+        const components = this._findComponents(scripts);
+
         return {
-            scripts:    this._findByExt(root, ".js"),
-            styles:     this._findByExt(root, ".css"),
-            html:       this._findByExt(root, ".html"),
-            components: this._findComponents(root),
-            entryPoint: this._findEntry(root),
-            gitBranch:  this._git("git branch --show-current", root),
+            root,
+            entryPoint:  this._findEntry(root),
+            gitBranch:   this._git("git branch --show-current", root),
+            scripts,
+            styles,
+            html,
+            components,
+            sources: {
+                scripts: this._readSources(scripts),
+                styles:  this._readSources(styles),
+                html:    this._readSources(html),
+            },
         };
     }
 
@@ -61,7 +74,7 @@ export default class VanillaES6Adapter extends BaseAdapter {
         const walk = (d) => {
             try {
                 for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-                    if (e.name === "node_modules") continue;
+                    if (e.name === "node_modules" || e.name.startsWith(".")) continue;
                     const full = path.join(d, e.name);
                     if (e.isDirectory()) { walk(full); continue; }
                     if (e.name.endsWith(ext)) results.push(full.replace(/\\/g, "/"));
@@ -72,9 +85,23 @@ export default class VanillaES6Adapter extends BaseAdapter {
         return results;
     }
 
-    // Heuristic: JS files that export default class extending Component
-    _findComponents(root) {
-        return this._findByExt(root, ".js").filter(f => {
+    _readSources(filePaths, maxSizeKB = 64) {
+        const sources = {};
+        for (const fp of filePaths) {
+            try {
+                const stat = fs.statSync(fp);
+                if (stat.size > maxSizeKB * 1024) {
+                    sources[fp] = { truncated: true, sizeKB: Math.round(stat.size / 1024) };
+                    continue;
+                }
+                sources[fp] = fs.readFileSync(fp, "utf-8");
+            } catch { /* skip unreadable */ }
+        }
+        return sources;
+    }
+
+    _findComponents(scriptPaths) {
+        return scriptPaths.filter(f => {
             try {
                 const src = fs.readFileSync(f, "utf-8");
                 return /export\s+default\s+class\s+\w+\s+extends\s+Component/.test(src);
