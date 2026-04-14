@@ -32,13 +32,12 @@ router.post("/save", async (req, res) => {
 router.post("/commit", async (req, res) => {
     try {
         const project = WorkspaceService.getProject();
-        const { message, mergeMessage } = req.body;
-        await VCSService.commit(project, message, mergeMessage);
+        const { message } = req.body;          // mergeMessage removed
+        await VCSService.commit(project, message);
         res.sendStatus(200);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
-
 
 export default router;

@@ -1,9 +1,10 @@
+import IDEShell from "./components/IDEShell/IDEShell.js";
 import Header from "./components/Header/Header.js";
 import Explorer from "./components/Explorer/Explorer.js";
-import Editor from "./components/Editor/Editor.js";
-import IDEShell from "./components/IDEShell/IDEShell.js";
-import EditorBar   from "./components/Editor/EditorBar.js";
 import SidebarManager from "./components/Sidebar/SidebarManager.js";
+import Editor from "./components/Editor/Editor.js";
+import EditorBar   from "./components/Editor/EditorBar.js";
+import ScriptConsole from "./components/Editor/ScriptConsole.js";
 import { setProject, hasProject } from "./core/ProjectStore.js";
 import { getCurrentProject } from "./services/ProjectService.js";
 import { on, emit } from "./core/EventBus.js";
@@ -39,6 +40,9 @@ async function bootstrap() {
     editor = new Editor(document.getElementById("editor"));
     editor.mount();
 
+    const console_ = new ScriptConsole(document.getElementById("script-console"));
+    console_.mount();
+
     // Sidebar manager — owns pin/hover behaviour
     const sidebarManager = new SidebarManager({
         activityBar: document.getElementById("activity-bar"),
@@ -70,6 +74,7 @@ async function bootstrap() {
     // Events
     //////////////////////////////////////////////////////
 
+
     on("project:changed", async () => {
         await explorer.mount();
         await scriptEngine.reloadAll();  // force=true, clears cache
@@ -90,8 +95,8 @@ async function bootstrap() {
         const { vcsCommit } = await import("./services/FileService.js");
 
         new CommitModal().open({
-            onCommit: async ({ message, mergeMessage }) => {
-                const res = await vcsCommit({ message, mergeMessage });
+            onCommit: async ({ message }) => {
+                const res = await vcsCommit({ message });
                 if (!res.ok) {
                     const { error } = await res.json().catch(() => ({ error: "Unknown error" }));
                     alert(`Commit failed: ${error}`);
@@ -101,6 +106,9 @@ async function bootstrap() {
             },
         });
     });
+    on("script:console:toggle", () => console_.toggle());
+    on("script:console:show",   () => console_.show());
+
 
 }
 

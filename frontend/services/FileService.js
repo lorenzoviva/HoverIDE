@@ -44,9 +44,10 @@ export async function listFiles() {
 export async function lsDir(dirPath) {
     return fetch(`/api/file/ls?path=${encodeURIComponent(dirPath)}`).then(r => r.json());
 }
-export async function vcsCommit({ message, mergeMessage }) {
+export async function vcsCommit({ message }) {
     return fetch("/api/vcs/commit", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, mergeMessage }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
     });
 }

@@ -111,4 +111,13 @@ router.post("/rename", (req, res) => {
     }
 });
 
+router.get("/raw", (req, res) => {
+    try {
+        const fullPath = resolvePath(req.query.path);
+        res.sendFile(fullPath, { dotfiles: "deny" });
+    } catch (e) {
+        res.status(400).json({ error: e.message });
+    }
+});
+
 export default router;
